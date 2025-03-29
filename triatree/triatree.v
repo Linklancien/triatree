@@ -1,5 +1,7 @@
 module triatree
 
+const triabase = [0, 1, 2, 3]
+
 type Self = Cara | Childs 
 
 struct Triatree {
@@ -34,11 +36,52 @@ fn (tree Triatree) neighbors(pos []int) [][]int{
 
 	nei << pos[..n-1]
 	nei[0] << [0]
-	if pos[n-1] != pos[n-2]{
 
+	mut to_ad := private(triabase, [0, pos[n-1]])
+	if pos[n-1] != pos[n-2]{
+		// au sein du même triangle, le triangle {1, 2, 3} sera toujours opposé au triangle [0]x{1, 2, 3}, pour la même valeur
+		nei << pos[..n-2]
+		nei[nei.len-1] << [0]
+		nei[nei.len-1] << [pos[n-2]]
+		to_ad = private(to_ad, [pos[n-2]])
 	}
 	if pos[n-1] == pos[n-2]{}
+	
 	return nei
+}
+
+fn (tree Triatree) hexa_world_neighbors(pos []int, current int) ([]int, [][]int){
+	mut directs_neighbors := tree.neighbors(pos)
+
+	if directs_neighbors.len == 2{
+		if pos[0] == 2{
+
+		}
+		if pos[0] == 3{
+			
+		}
+	}
+	else if directs_neighbors.len == 1{
+		if pos[0] == 1{
+			directs_neighbors << []int{len: pos.len, init: 1}
+			directs_neighbors << []int{len: pos.len, init: 1}
+			// the order doesn't mater because they are all [1, 1, ..., 1]
+			// this is the nearest of the center of the world
+			return hexa_near_triangle(current), directs_neighbors
+		}
+	}
+	// pos is inside a triangle
+	return []int{len: 3, init: current}, directs_neighbors
+}
+
+fn hexa_near_triangle(current int) []int{
+	if current == 1{
+		return [6, 1, 2]
+	}
+	if current == 6{
+		return [5, 6, 1]
+	}
+	return [current - 1, current, current + 1]
 }
 
 fn private(base []int, liste []int) []int{

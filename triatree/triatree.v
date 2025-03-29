@@ -1,5 +1,8 @@
 module triatree
 
+import math
+import math.vec
+
 const triabase = [0, 1, 2, 3]
 
 type Self = Cara | Childs 
@@ -22,6 +25,23 @@ struct Cara {
 	
 }
 
+fn coo_tria_to_cart(pos []int, rota) vec.Vec2[f32]{
+	position = vec.vec2[f32](0.0, 0.0)
+	mut angle := rota
+	for id in 0..pos.len{
+		n := pos.len - 1 - id
+		if co[id] == 0{
+			angle += math.pi
+		}
+		else{
+			pos += vec.vec2[f32](1/6*sqrt(3)*2^(n), 0).rotate_around_ccw(o Vec2[T], angle + (co[id] - 1)*math.pi*2/3)
+			// Distance a vérif
+		}
+	}
+	return position
+}
+
+// neighbors
 fn (tree Triatree) neighbors(pos []int) [][]int{
 	n	:= pos.len
 	mut nei	:= [][]int{}

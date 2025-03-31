@@ -25,16 +25,16 @@ struct Cara {
 	
 }
 
-fn coo_tria_to_cart(pos []int, rota) vec.Vec2[f32]{
-	position = vec.vec2[f32](0.0, 0.0)
+fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32]{
+	mut position := vec.vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0..pos.len{
 		n := pos.len - 1 - id
-		if co[id] == 0{
+		if pos[id] == 0{
 			angle += math.pi
 		}
 		else{
-			pos += vec.vec2[f32](1/6*sqrt(3)*2^(n), 0).rotate_around_ccw(o Vec2[T], angle + (co[id] - 1)*math.pi*2/3)
+			position += vec.vec2[f32](f32(math.pow(2, n)*math.sqrt(3)/6), 0).rotate_around_ccw(vec.vec2(f32(0), f32(0)), angle + f32(pos[id] - 1)*math.pi*2/3)
 			// Distance a vérif
 		}
 	}
@@ -64,8 +64,33 @@ fn (tree Triatree) neighbors(pos []int) [][]int{
 		nei[nei.len-1] << [0]
 		nei[nei.len-1] << [pos[n-2]]
 		to_ad = private(to_ad, [pos[n-2]])
+		// 1 out of 3
+
+		mut all := [0]
+		all << pos[n-1]
+		all << pos[n-2]
+		high := private(triabase, all)
+		for id_r in 1..pos.len{
+			id := pos.len - id_r - 1
+			if pos[id] == 0{
+				nei << pos[..(id)]
+				nei[nei.len-1] << high
+
+				mut tempo_fix := private(triabase, [0])
+				tempo_fix = private(tempo_fix, high)
+				for i in (id + 1)..(pos.len - 1){
+					tempo := private(tempo_fix, [pos[i]])
+					nei[nei.len-1] << tempo
+				}
+
+				nei[nei.len-1] << to_ad
+				break
+			}
+		}
 	}
-	if pos[n-1] == pos[n-2]{}
+	else if pos[n-1] == pos[n-2]{
+		
+	}
 	
 	return nei
 }

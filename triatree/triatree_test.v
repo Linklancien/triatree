@@ -10,9 +10,10 @@ fn test_neighbors() {
 				// Check for the triangle in the center of a larger triangle
 				pos := [0, x, y, z]
 				nei := tree.neighbors(pos)
-				print(pos)
-				print(" : ")
-				println(nei)
+				// print de debug visuel:
+				// print(pos)
+				// print(" : ")
+				// println(nei)
 				// Only 3 triangle can be one's neighbor
 				assert nei.len == 3 , 'assertion 1 failed for [0, x, y, z]: ${[0, x, y, z]}'
 

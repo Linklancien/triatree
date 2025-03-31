@@ -68,11 +68,12 @@ fn (tree Triatree) neighbors(pos []int) [][]int{
 	for tempo_id in 0..n{
 		id 		:= n - tempo_id - 1
 		if pos[id] != pos[n-1]{
-			if pos[id] == 0{
+			if pos[id] == 0 && to_ad.len == 2{
+				if pos == [0, 0, 1, 2]{panic(to_ad)}
 				nei << pos[..id]
 				nei[nei.len-1] << to_ad[0]
 				nei[nei.len-1] << []int{len: tempo_id, init: to_ad[1]}
-
+				
 				nei << pos[..id]
 				nei[nei.len-1] << to_ad[1]
 				nei[nei.len-1] << []int{len: tempo_id, init: to_ad[0]}
@@ -80,13 +81,27 @@ fn (tree Triatree) neighbors(pos []int) [][]int{
 			}
 			else{
 				// pos[id] appartient a {1, 2, 3}\{pos[n-1]}
-				possible := private(to_ad, [pos[id]])
-				if possible.len == 1{
-					nei << pos[..(id-1)]
-					nei[nei.len-1] << [0]
-					nei[nei.len-1] << []int{len: tempo_id, init: possible[0]}
+				if to_ad.len == 2{
+					possible := private(to_ad, [pos[id]])
+					if possible.len == 1{
+						nei << pos[..id]
+						nei[nei.len-1] << [0]
+						nei[nei.len-1] << []int{len: tempo_id, init: possible[0]}
 
-					to_ad = private(to_ad, possible)
+						to_ad = private(to_ad, possible)
+					}
+				}
+				else if to_ad.len == 1{
+					nei << pos[..id]
+					orientation := private(triabase, [0, pos[n-1], to_ad[0]])
+					nei[nei.len-1] << orientation
+
+					new_base := private(triabase, [0, orientation[0]])
+					for finition in (id + 1)..n{
+						nei[nei.len-1] << private(new_base, [pos[finition]])
+					}
+					
+					return nei
 				}
 			}
 		}

@@ -41,6 +41,12 @@ fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32]{
 	return position
 }
 
+fn coo_cart_to_tria(pos vec.Vec2[f32]) []int{
+	// to complete
+	panic("Not completed")
+	return [0]
+}
+
 // neighbors
 fn (tree Triatree) neighbors(pos []int) [][]int{
 	n	:= pos.len
@@ -130,10 +136,13 @@ fn (tree Triatree) hexa_world_neighbors(pos []int, current int) ([]int, [][]int)
 			return hexa_near_triangle(current), directs_neighbors
 		}
 	}
+	else{panic("A 0 without neigbor in it's base ??? pos: ${pos} current: ${current}")}
 	// pos is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
 }
 
+
+// utilitary
 fn hexa_near_triangle(current int) []int{
 	if current == 1{
 		return [6, 1, 2]
@@ -144,6 +153,7 @@ fn hexa_near_triangle(current int) []int{
 	return [current - 1, current, current + 1]
 }
 
+// very usefull:
 fn private(base []int, liste []int) []int{
 	mut final := []int{}
 	for elem in base{

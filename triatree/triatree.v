@@ -56,40 +56,40 @@ fn (tree Triatree) neighbors(pos []int) [][]int{
 
 	nei << pos[..n-1]
 	nei[0] << [0]
-
 	mut to_ad := private(triabase, [0, pos[n-1]])
-	if pos[n-1] != pos[n-2]{
-		// au sein du même triangle, le triangle {1, 2, 3} sera toujours opposé au triangle [0]x{1, 2, 3}, pour la même valeur
-		nei << pos[..n-2]
-		nei[nei.len-1] << [0]
-		nei[nei.len-1] << [pos[n-2]]
-		to_ad = private(to_ad, [pos[n-2]])
-		// 1 out of 3
 
-		mut all := [0]
-		all << pos[n-1]
-		all << pos[n-2]
-		high := private(triabase, all)
-		for id_r in 1..pos.len{
-			id := pos.len - id_r - 1
+	// au sein du même triangle, le triangle {1, 2, 3} sera toujours opposé au triangle [0]x{1, 2, 3}, pour la même valeur
+	// nei << pos[..n-2]
+	// nei[nei.len-1] << [0]
+	// nei[nei.len-1] << [pos[n-2]]
+	// to_ad = private(to_ad, [pos[n-2]])
+	// 1 out of 3
+
+	for tempo_id in 0..n{
+		id 		:= n - tempo_id - 1
+		if pos[id] != pos[n-1]{
 			if pos[id] == 0{
-				nei << pos[..(id)]
-				nei[nei.len-1] << high
+				nei << pos[..id]
+				nei[nei.len-1] << to_ad[0]
+				nei[nei.len-1] << []int{len: tempo_id, init: to_ad[1]}
 
-				mut tempo_fix := private(triabase, [0])
-				tempo_fix = private(tempo_fix, high)
-				for i in (id + 1)..(pos.len - 1){
-					tempo := private(tempo_fix, [pos[i]])
-					nei[nei.len-1] << tempo
+				nei << pos[..id]
+				nei[nei.len-1] << to_ad[1]
+				nei[nei.len-1] << []int{len: tempo_id, init: to_ad[0]}
+				return nei
+			}
+			else{
+				// pos[id] appartient a {1, 2, 3}\{pos[n-1]}
+				possible := private(to_ad, [pos[id]])
+				if possible.len == 1{
+					nei << pos[..(id-1)]
+					nei[nei.len-1] << [0]
+					nei[nei.len-1] << []int{len: tempo_id, init: possible[0]}
+
+					to_ad = private(to_ad, possible)
 				}
-
-				nei[nei.len-1] << to_ad
-				break
 			}
 		}
-	}
-	else if pos[n-1] == pos[n-2]{
-		
 	}
 	
 	return nei

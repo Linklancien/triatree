@@ -8,20 +8,26 @@ fn test_neighbors() {
 		for y in 0..4{
 			for z in 0..4{
 				// Check for the triangle in the center of a larger triangle
-				nei := tree.neighbors([0, x, y, z])
+				pos := [0, x, y, z]
+				nei := tree.neighbors(pos)
+				print(pos)
+				print(" : ")
+				println(nei)
+				// Only 3 triangle can be one's neighbor
 				assert nei.len == 3 , 'assertion 1 failed for [0, x, y, z]: ${[0, x, y, z]}'
 
 				total := private(triabase, [z])
 				mut ad := private(triabase, [z])
 				for elem in nei{
 					assert elem[elem.len-1] != z , 'assertion 2 failed for [0, x, y, z]: ${[0, x, y, z]}, elem[elem.len-1]: ${elem[elem.len-1]}'
-					assert elem.len == 4 , 'assertion 3 failed for [0, x, y, z]: ${[0, x, y, z]} : elem: ${elem}'
+					assert elem.len == pos.len , 'assertion 3 failed for [0, x, y, z]: ${[0, x, y, z]} : elem: ${elem}'
 					for is_added in total{
 						if is_added == elem[elem.len-1]{
 							ad = private(ad, [elem[elem.len-1]])
 						}
 					}
 				}
+				// Check if this triangle has the other 3 coo in it's neigbor
 				assert ad.len == 0 , 'assertion 4 failed for [0, x, y, z]: ${[0, x, y, z]} : ad: ${ad}'
 			}
 		}

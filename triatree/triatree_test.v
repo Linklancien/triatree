@@ -1,6 +1,6 @@
 module triatree
 
-@[assert_continues]
+// @[assert_continues]
 fn test_neighbors() {
 	println("--------------------")
 	println("test_neighbors():")
@@ -12,14 +12,13 @@ fn test_neighbors() {
 			for z in 0..4{
 				// Check for the triangle in the center of a larger triangle
 				pos := [0, x, y, z]
-				nei := tree.neighbors(pos)
+				nei := neighbors(pos)
 				// print de debug visuel:
 				// print(pos)
 				// print(" : ")
 				// println(nei)
 				// Only 3 triangle can be one's neighbor
 				assert nei.len == 3 , 'assertion 1 failed for [0, x, y, z]: ${pos}'
-
 				total := private(triabase, [z])
 				mut ad := private(triabase, [z])
 				for elem in nei{
@@ -31,7 +30,7 @@ fn test_neighbors() {
 						}
 					}
 				}
-				// Check if this triangle has the other 3 coo in it's neigbor
+				// Check if this triangle has the other 3 coo in it's neighbor
 				assert ad.len == 0 , 'assertion 4 failed for [0, x, y, z]: ${pos} : ad: ${ad}'
 			}
 		}
@@ -42,7 +41,7 @@ fn test_neighbors() {
 	for x in 1..4{
 		for y in 1..4{
 			pos := [x, y, y, y]
-			nei := tree.neighbors(pos)
+			nei := neighbors(pos)
 			if x == y{
 				assert nei.len == 1 , 'assertion 1.1 failed for [0, x, y, z]: ${pos}'
 			}
@@ -50,6 +49,26 @@ fn test_neighbors() {
 				assert nei.len == 2 , 'assertion 1.2 failed for [0, x, y, z]: ${pos}'
 			}
 		}
+	}
+	println("success")
+	print("test 3 is nei of nei: ")
+	try := [[0, 1, 1, 2], [0, 0, 0, 0], [0, 1, 1, 1], [3, 1, 2, 3]]
+	for elem in try{
+		nei := neighbors(elem)
+		mut is_nei := [][]int{}
+		for to_check in nei{
+			test := neighbors(to_check)
+			println("")
+			print("$to_check: ")
+			println(test)
+			for current in test{
+				if current == elem{
+					is_nei << to_check
+					break
+				}
+			}
+		}
+		assert is_nei.len == 3 , 'assertion 1 failed for [...] = ${elem}: \n $is_nei alors que $nei'
 	}
 	println("success")
 	println("Passed")

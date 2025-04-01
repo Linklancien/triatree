@@ -48,7 +48,7 @@ fn coo_cart_to_tria(pos vec.Vec2[f32]) []int{
 }
 
 // neighbors
-fn (tree Triatree) neighbors(pos []int) [][]int{
+fn neighbors(pos []int) [][]int{
 	n	:= pos.len
 	mut nei	:= [][]int{}
 	if pos[n-1] == 0{
@@ -70,10 +70,10 @@ fn (tree Triatree) neighbors(pos []int) [][]int{
 	// nei[nei.len-1] << [pos[n-2]]
 	// to_ad = private(to_ad, [pos[n-2]])
 	// 1 out of 3
-
+	mut first_stop := -1
 	for tempo_id in 0..n{
 		id 		:= n - tempo_id - 1
-		if pos[id] != pos[n-1]{
+		if pos[id] != pos[n-1] && pos[id] != first_stop {
 			if pos[id] == 0 && to_ad.len == 2{
 				if pos == [0, 0, 1, 2]{panic(to_ad)}
 				nei << pos[..id]
@@ -95,15 +95,23 @@ fn (tree Triatree) neighbors(pos []int) [][]int{
 						nei[nei.len-1] << []int{len: tempo_id, init: possible[0]}
 
 						to_ad = private(to_ad, possible)
+						first_stop = pos[id]
 					}
 				}
 				else if to_ad.len == 1{
+					// if pos == [3, 2, 2, 1]{panic("IcI , $pos $id, ${pos[..id]}, Ca  ${[0, pos[n-1], to_ad[0]]}")}
 					nei << pos[..id]
-					orientation := private(triabase, [0, pos[n-1], to_ad[0]])
+					mut orientation := [0]
+					if pos[0] == 0{
+						orientation = private(triabase, [pos[0], pos[n-1], to_ad[0]])
+					}
 					nei[nei.len-1] << orientation
 
-					new_base := private(triabase, [0, orientation[0]])
+					new_base := private(triabase, [0,  pos[id], orientation[0]])
 					for finition in (id + 1)..n{
+						// if private(new_base, [pos[finition]]).len != 1{
+						// 	panic("${private(new_base, [pos[finition]])}, ${pos[id]}, ${orientation[0]}")
+						// }
 						nei[nei.len-1] << private(new_base, [pos[finition]])
 					}
 					
@@ -117,7 +125,7 @@ fn (tree Triatree) neighbors(pos []int) [][]int{
 }
 
 fn (tree Triatree) hexa_world_neighbors(pos []int, current int) ([]int, [][]int){
-	mut directs_neighbors := tree.neighbors(pos)
+	mut directs_neighbors := neighbors(pos)
 
 	if directs_neighbors.len == 2{
 		if pos[0] == 2{

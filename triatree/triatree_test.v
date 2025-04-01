@@ -57,26 +57,56 @@ fn test_neighbors() {
 	for x in 0..4{
 		for y in 0..4{
 			for z in 0..4{
-				elem := [x, y, z]
-				nei := neighbors(elem)
-				mut is_nei := [][]int{}
-				for to_check in nei{
-					test := neighbors(to_check)
-					// println("")
-					// print("$to_check: ")
-					// println(test)
-					for current in test{
-						if current == elem{
-							is_nei << to_check
-							break
+				for t in 0..4{
+					elem := [x, y, z, t]
+					nei := neighbors(elem)
+					mut is_nei := [][]int{}
+					for to_check in nei{
+						test := neighbors(to_check)
+						// println("")
+						// print("$to_check: ")
+						// println(test)
+						for current in test{
+							if current == elem{
+								is_nei << to_check
+								break
+							}
 						}
 					}
+					assert is_nei.len == nei.len , 'assertion 1 failed for [...] = ${elem}: \n $is_nei alors que $nei'
 				}
-				assert is_nei.len == nei.len , 'assertion 1 failed for [...] = ${elem}: \n $is_nei alors que $nei'
 			}
 		}
 	}
 	println("success")
+	println("Passed")
+	println("--------------------")
+}
+
+fn test_hexa_world_neighbors() {
+	println("--------------------")
+	println("test_hexa_world_neighbors():")
+
+	print("test 1 specifics cases: ")
+	near_null, nei_null := hexa_world_neighbors([]int{}, 1)
+	assert near_null.len == 2	, 'assertion failed for specific: []'
+	assert near_null[0]	 != near_null[1] 	, 'assertion failed for specific: []'
+	assert nei_null.len  == 2	, 'assertion failed for specific: []'
+	println("success")
+
+	print("test 2 insides cases: ")
+	for x in 0..4{
+		for y in 0..4{
+			pos := [0, x, y]
+			near, nei := hexa_world_neighbors(pos, 1)
+			assert near.len == 3	, 'assertion failed for specific: []'
+			assert nei.len  == 3	, 'assertion failed for specific: []'
+			also_nei := neighbors(pos)
+			assert nei ==  also_nei, 'assertion failed for specific: [] \n $nei != $also_nei'
+		}
+	}
+	println("success")
+
 	println("Passed")
 	println("--------------------")
 }

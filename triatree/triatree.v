@@ -65,10 +65,6 @@ fn neighbors(pos []int) [][]int{
 	mut to_ad := private(triabase, [0, pos[n-1]])
 
 	// au sein du même triangle, le triangle {1, 2, 3} sera toujours opposé au triangle [0]x{1, 2, 3}, pour la même valeur
-	// nei << pos[..n-2]
-	// nei[nei.len-1] << [0]
-	// nei[nei.len-1] << [pos[n-2]]
-	// to_ad = private(to_ad, [pos[n-2]])
 	// 1 out of 3
 	mut first_stop := -1
 	for tempo_id in 0..n{
@@ -99,7 +95,6 @@ fn neighbors(pos []int) [][]int{
 					}
 				}
 				else if to_ad.len == 1{
-					// if pos == [3, 2, 2, 1]{panic("IcI , $pos $id, ${pos[..id]}, Ca  ${[0, pos[n-1], to_ad[0]]}")}
 					nei << pos[..id]
 					mut orientation := [0]
 					if pos[id] == 0{
@@ -107,11 +102,9 @@ fn neighbors(pos []int) [][]int{
 					}
 					nei[nei.len-1] << orientation
 
-					new_base := private(triabase, [0,  pos[id], orientation[0]])
+					new_base := private(triabase, [pos[id], orientation[0]])
+					// new_base.len == 2 
 					for finition in (id + 1)..n{
-						// if private(new_base, [pos[finition]]).len != 1{
-						// 	panic("${private(new_base, [pos[finition]])}, ${pos[id]}, ${orientation[0]}, $new_base")
-						// }
 						nei[nei.len-1] << private(new_base, [pos[finition]])
 					}
 					
@@ -124,18 +117,15 @@ fn neighbors(pos []int) [][]int{
 	return nei
 }
 
-fn (tree Triatree) hexa_world_neighbors(pos []int, current int) ([]int, [][]int){
+fn hexa_world_neighbors(pos []int, current int) ([]int, [][]int){
+	if pos == []{
+		near := hexa_near_triangle(current)
+		return [near[0], near[2]], [[]int{}, []int{}]
+	}
+
 	mut directs_neighbors := neighbors(pos)
 
-	if directs_neighbors.len == 2{
-		if pos[0] == 2{
-
-		}
-		if pos[0] == 3{
-			
-		}
-	}
-	else if directs_neighbors.len == 1{
+	if directs_neighbors.len == 1{
 		if pos[0] == 1{
 			directs_neighbors << []int{len: pos.len, init: 1}
 			directs_neighbors << []int{len: pos.len, init: 1}
@@ -144,7 +134,31 @@ fn (tree Triatree) hexa_world_neighbors(pos []int, current int) ([]int, [][]int)
 			return hexa_near_triangle(current), directs_neighbors
 		}
 	}
-	else{panic("A 0 without neigbor in it's base ??? pos: ${pos} current: ${current}")}
+	if directs_neighbors.len <= 2{
+		mut nei := []int{}
+		possible := [2, 3]
+		mut other := -1
+		for id in 0..pos.len{
+			if pos[id] == 1{
+				nei << [1]
+			}
+			else{
+				other = pos[id]
+				nei << private(possible, [pos[id]])
+			}
+		}
+		directs_neighbors << nei
+		tria_nei := hexa_near_triangle(current)
+		mut near := [tria_nei[1]]
+		if other == 2{
+			near << [tria_nei[2]]
+		}
+		else if other == 3{
+			near << [tria_nei[1]]
+		}
+		return near , directs_neighbors
+	}
+	// else{panic("A 0 without 3 neigbors in it's base ??? pos: ${pos} current: ${current}")}
 	// pos is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
 }

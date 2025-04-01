@@ -52,23 +52,29 @@ fn test_neighbors() {
 	}
 	println("success")
 	print("test 3 is nei of nei: ")
-	try := [[0, 1, 1, 2], [0, 0, 0, 0], [0, 1, 1, 1], [3, 1, 2, 3]]
-	for elem in try{
-		nei := neighbors(elem)
-		mut is_nei := [][]int{}
-		for to_check in nei{
-			test := neighbors(to_check)
-			println("")
-			print("$to_check: ")
-			println(test)
-			for current in test{
-				if current == elem{
-					is_nei << to_check
-					break
+	// try := [[0, 1, 1, 2], [0, 0, 0, 0], [0, 1, 1, 1], [3, 1, 2, 3]]
+	// for elem in try{
+	for x in 0..4{
+		for y in 0..4{
+			for z in 0..4{
+				elem := [x, y, z]
+				nei := neighbors(elem)
+				mut is_nei := [][]int{}
+				for to_check in nei{
+					test := neighbors(to_check)
+					// println("")
+					// print("$to_check: ")
+					// println(test)
+					for current in test{
+						if current == elem{
+							is_nei << to_check
+							break
+						}
+					}
 				}
+				assert is_nei.len == nei.len , 'assertion 1 failed for [...] = ${elem}: \n $is_nei alors que $nei'
 			}
 		}
-		assert is_nei.len == 3 , 'assertion 1 failed for [...] = ${elem}: \n $is_nei alors que $nei'
 	}
 	println("success")
 	println("Passed")

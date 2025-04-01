@@ -102,15 +102,15 @@ fn neighbors(pos []int) [][]int{
 					// if pos == [3, 2, 2, 1]{panic("IcI , $pos $id, ${pos[..id]}, Ca  ${[0, pos[n-1], to_ad[0]]}")}
 					nei << pos[..id]
 					mut orientation := [0]
-					if pos[0] == 0{
-						orientation = private(triabase, [pos[0], pos[n-1], to_ad[0]])
+					if pos[id] == 0{
+						orientation = private(triabase, [0, pos[n-1], to_ad[0]])
 					}
 					nei[nei.len-1] << orientation
 
 					new_base := private(triabase, [0,  pos[id], orientation[0]])
 					for finition in (id + 1)..n{
 						// if private(new_base, [pos[finition]]).len != 1{
-						// 	panic("${private(new_base, [pos[finition]])}, ${pos[id]}, ${orientation[0]}")
+						// 	panic("${private(new_base, [pos[finition]])}, ${pos[id]}, ${orientation[0]}, $new_base")
 						// }
 						nei[nei.len-1] << private(new_base, [pos[finition]])
 					}

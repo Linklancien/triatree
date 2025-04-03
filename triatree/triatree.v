@@ -23,7 +23,7 @@ struct Childs {
 }
 
 struct Cara {
-	
+	// quantitées intensives
 }
 
 fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32]{
@@ -223,14 +223,13 @@ fn (mut tree Triatree) merge_divide(change Changement){
 		.merge{
 			match tree.compo{
 				Childs{
-
+					// trouver parmis les childs si les cara sont les mêmes ?
 				}
 				else{}
 			}
 		}
 	}
 }
-
 
 // utilitary
 fn hexa_near_triangle(current int) []int{

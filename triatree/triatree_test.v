@@ -102,7 +102,26 @@ fn test_hexa_world_neighbors() {
 			assert near.len == 3	, 'assertion failed for specific: []'
 			assert nei.len  == 3	, 'assertion failed for specific: []'
 			also_nei := neighbors(pos)
-			assert nei ==  also_nei, 'assertion failed for specific: [] \n $nei != $also_nei'
+			assert nei ==  also_nei , 'assertion failed for specific: [] \n $nei != $also_nei'
+		}
+	}
+	println("success")
+	print("test 3 edge cases: ")
+	for cur in 1..7{
+		for t in 1..3{
+			for aff in [1, t]{
+				for aff_sec in [1, t]{
+					pos := [t, aff, aff_sec]
+					near, nei := hexa_world_neighbors(pos, 1)
+					mut count := 0
+					for n in near{
+						if n != cur{
+							count += 1
+						}
+					}
+					assert count >= 1 , 'assertion failed for edge: $pos \n $near == $cur'
+				}
+			}
 		}
 	}
 	println("success")

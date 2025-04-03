@@ -8,15 +8,16 @@ const triabase = [0, 1, 2, 3]
 type Self = Cara | Childs 
 
 struct Triatree {
-	compo	Self	
+	mut:
+	compo		Self	
 	
-	pos		[]int
+	pos			[]int
 	dimensions	int		// 0 le plus petit
 }
 
 struct Childs {
-	center	Triatree
-	up		Triatree
+	mid	Triatree
+	up	Triatree
 	left	Triatree
 	right	Triatree
 }
@@ -161,6 +162,73 @@ fn hexa_world_neighbors(pos []int, current int) ([]int, [][]int){
 	// else{panic("A 0 without 3 neigbors in it's base ??? pos: ${pos} current: ${current}")}
 	// pos is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
+}
+
+// find
+fn (tree Triatree) go_to(pos []int) &Triatree{
+	if pos == tree.pos{
+		return &tree
+	}
+	match tree.compo{
+		Childs{
+			if pos[0] == 0{
+				return tree.compo.mid.go_to(pos[1..])
+			}
+			else if pos[0] == 1{
+				return tree.compo.mid.go_to(pos[1..])
+			}
+			else if pos[0] == 2{
+				return tree.compo.mid.go_to(pos[1..])
+			}
+			else if pos[0] == 3{
+				return tree.compo.mid.go_to(pos[1..])
+			}
+		}
+		else{}
+	}
+	return &tree
+}
+
+// divide & merge
+enum Changement {
+	divide
+	merge
+}
+
+fn (mut tree Triatree) merge_divide(change Changement){
+	match change{
+		.divide{
+			if tree.dimensions > 0{
+				match tree.compo{
+					Cara{
+						mut pos_0 := tree.pos.clone()
+						pos_0 << [0]
+						mut pos_1 := tree.pos.clone()
+						pos_1 << [1]
+						mut pos_2 := tree.pos.clone()
+						pos_2 << [2]
+						mut pos_3 := tree.pos.clone()
+						pos_3 << [3]
+						tree.compo = Childs{
+							mid	:	Triatree{compo: tree.compo, pos: pos_0, dimensions: (tree.dimensions - 1)}
+							up	:	Triatree{compo: tree.compo, pos: pos_1, dimensions: (tree.dimensions - 1)}
+							left:	Triatree{compo: tree.compo, pos: pos_2, dimensions: (tree.dimensions - 1)}
+							right:	Triatree{compo: tree.compo, pos: pos_3, dimensions: (tree.dimensions - 1)}
+						}
+					}
+					else{}
+				}
+			}
+		}
+		.merge{
+			match tree.compo{
+				Childs{
+
+				}
+				else{}
+			}
+		}
+	}
 }
 
 

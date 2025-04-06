@@ -1,5 +1,3 @@
-module triatree
-
 // @[assert_continues]
 fn test_neighbors() {
 	println("--------------------")

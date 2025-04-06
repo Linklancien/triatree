@@ -1,5 +1,3 @@
-module triatree
-
 import math
 import math.vec
 
@@ -233,11 +231,11 @@ fn (mut tree Triatree) merge_divide(change Changement){
 
 // utilitary
 fn hexa_near_triangle(current int) []int{
-	if current == 1{
-		return [6, 1, 2]
+	if current == 0{
+		return [5, 0, 1]
 	}
-	if current == 6{
-		return [5, 6, 1]
+	if current == 5{
+		return [4, 5, 0]
 	}
 	return [current - 1, current, current + 1]
 }

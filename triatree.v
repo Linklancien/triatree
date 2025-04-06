@@ -103,8 +103,9 @@ fn neighbors(pos []int) [][]int{
 					}
 					nei[nei.len-1] << orientation
 
-					new_base := private(triabase, [pos[id], orientation[0]])
 					// new_base.len == 2 
+					// adjustements to be of the same dimension
+					new_base := private(triabase, [pos[id], orientation[0]])
 					for finition in (id + 1)..n{
 						nei[nei.len-1] << private(new_base, [pos[finition]])
 					}
@@ -192,14 +193,25 @@ fn (tree Triatree) go_to(pos []int) &Triatree{
 // physic
 fn gravity(pos []int, center int) []int{
 	n	:= pos.len
-	if pos[n - 1] != center{
-		mut new := pos[..(n-1)].clone()
-		if pos[n - 1] == 0{
-			new << center
+	for i in 0..n{
+		id := n - i - 1
+		if pos[id] != center{
+			mut new := pos[..(n-1)].clone()
+			if pos[id] == 0{
+				new << center
+				return new
+			}
+			else{
+				new << 0
+			}
+
+			// adjustements to be of the same dimension
+			new_base := private(triabase, [pos[id]])
+			for finition in (id + 1)..n{
+				new << private(new_base, [pos[finition]])
+			}
 			return new
 		}
-		new << 0
-		return new
 	}
 	// already at the center
 	return pos

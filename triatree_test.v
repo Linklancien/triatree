@@ -163,7 +163,7 @@ fn test_gravity(){
 							break
 						}
 					}
-					if z == center, z == x, z == y{
+					if z == center && z == x && z == y{
 						assert next == pos, 'assertion failed for: $pos, center: $center, also know as the extrem position'
 					}
 				}

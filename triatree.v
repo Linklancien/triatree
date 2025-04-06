@@ -1,3 +1,5 @@
+module main
+
 import math
 import math.vec
 
@@ -185,6 +187,22 @@ fn (tree Triatree) go_to(pos []int) &Triatree{
 		else{}
 	}
 	return &tree
+}
+
+// physic
+fn gravity(pos []int, center int) []int{
+	n	:= pos.len
+	if pos[n - 1] != center{
+		mut new := pos[..(n-1)].clone()
+		if pos[n - 1] == 0{
+			new << center
+			return new
+		}
+		new << 0
+		return new
+	}
+	// already at the center
+	return pos
 }
 
 // divide & merge

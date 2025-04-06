@@ -1,3 +1,5 @@
+module main 
+
 // @[assert_continues]
 fn test_neighbors() {
 	println("--------------------")
@@ -118,6 +120,52 @@ fn test_hexa_world_neighbors() {
 						}
 					}
 					assert count >= 1 , 'assertion failed for edge: $pos \n $near == $cur'
+				}
+			}
+		}
+	}
+	println("success")
+
+	println("Passed")
+	println("--------------------")
+}
+
+fn test_gravity(){
+	println("--------------------")
+	println("test_gravity():")
+	print("test 1 special case: ")
+	assert gravity([0], 1) == [1] , 'assertion failed for specific: [0]'
+	assert gravity([1], 1) == [1] , 'assertion failed for specific: [1]'
+	assert gravity([2], 1) == [0] , 'assertion failed for specific: [2]'
+	assert gravity([3], 1) == [0] , 'assertion failed for specific: [3]'
+	println("success")
+
+	print("test 2 one [x]: ")
+	for center in 1..3{
+		assert gravity([0], center) == [center] , 'assertion failed for specific: [0], center: $center'
+		assert gravity([center], center) == [center] , 'assertion failed for specific: [center], center: $center'
+		others := private([1, 2, 3], [center])
+		assert gravity([others[0]], center) == [0] , 'assertion failed for specific: [0], center: $center, others: ${others[0]}'
+		assert gravity([others[1]], center) == [0] , 'assertion failed for specific: [0], center: $center, others: ${others[1]}'
+	}
+	println("success")
+
+	print("test 3 more [x, y, z]: ")
+	for center in 1..3{
+		for x in 0..3{
+			for y in 0..3{
+				for z in 0..3{
+					pos := [x, y, z]
+					next := gravity(pos, center)
+					for test in private([1, 2, 3], [center]){
+						if z == test{
+							assert next == [x, y, 0], 'assertion failed for: $pos, center: $center'
+							break
+						}
+					}
+					if z == center, z == x, z == y{
+						assert next == pos, 'assertion failed for: $pos, center: $center, also know as the extrem position'
+					}
 				}
 			}
 		}

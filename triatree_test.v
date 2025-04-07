@@ -1,4 +1,4 @@
-module main 
+module main
 
 fn test_neighbors() {
 	println("--------------------")

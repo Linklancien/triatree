@@ -193,24 +193,53 @@ fn (tree Triatree) go_to(pos []int) &Triatree{
 // physic
 fn gravity(pos []int, center int) []int{
 	n	:= pos.len
+	// count
+	mut is_reverse := false
+	for elem in pos{
+		if elem == 0{
+			is_reverse = !is_reverse
+		}
+	}
+
+	// next position
 	for i in 0..n{
 		id := n - i - 1
 		if pos[id] != center{
-			mut new := pos[..(n-1)].clone()
-			if pos[id] == 0{
-				new << center
-				return new
+			mut next := pos[..(n-1)].clone()
+			if is_reverse{
+				// reverse orientation
+				if pos[id] == center{
+					next << 0
+					return next
+				}
+				else{
+					next << 0
+				}
+
+				// adjustements to be of the same dimension
+				new_base := private(triabase, [pos[id]])
+				for finition in (id + 1)..n{
+					next << private(new_base, [pos[finition]])
+				}
+				return next
 			}
 			else{
-				new << 0
-			}
+				// good orientation
+				if pos[id] == 0{
+					next << center
+					return next
+				}
+				else{
+					next << 0
+				}
 
-			// adjustements to be of the same dimension
-			new_base := private(triabase, [pos[id]])
-			for finition in (id + 1)..n{
-				new << private(new_base, [pos[finition]])
+				// adjustements to be of the same dimension
+				new_base := private(triabase, [pos[id]])
+				for finition in (id + 1)..n{
+					next << private(new_base, [pos[finition]])
+				}
+				return next
 			}
-			return new
 		}
 	}
 	// already at the center

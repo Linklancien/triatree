@@ -157,6 +157,7 @@ fn test_gravity(){
 				for z in 0..3{
 					pos := [x, y, z]
 					next := gravity(pos, center)
+					assert next.len == pos.len, 'assertion failed for lens : $pos, center: $center'
 					for test in private([1, 2, 3], [center]){
 						if z == test{
 							assert next == [x, y, 0], 'assertion failed for: $pos, center: $center'

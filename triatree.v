@@ -26,6 +26,8 @@ struct Cara {
 	// quantitées intensives
 }
 
+
+// coo tria_to_cart:
 fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32]{
 	mut position := vec.vec2[f32](0.0, 0.0)
 	mut angle := rota
@@ -52,10 +54,17 @@ fn hexa_world_coo_tri_to_cart(pos []int, main int, current int) vec.Vec2[f32]{
 	return coo_in_triangle
 }
 
+// coo cart_to_tria:
 fn coo_cart_to_tria(pos vec.Vec2[f32]) []int{
 	// to complete
 	panic("Not completed")
 	return [0]
+}
+
+fn hexa_world_coo_cart_to_tria(pos []int, main int, current int) (int, []int){
+	// to complete
+	panic("Not completed")
+	return main, [0]
 }
 
 // neighbors

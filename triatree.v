@@ -35,11 +35,21 @@ fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32]{
 			angle += math.pi
 		}
 		else{
-			position += vec.vec2[f32](f32(math.pow(2, n)*math.sqrt(3)/6), 0).rotate_around_ccw(vec.vec2(f32(0), f32(0)), angle + f32(pos[id] - 1)*math.pi*2/3)
-			// Distance a vérif
+			dist := f32(math.pow(2, n)*math.sqrt(3)/6)
+			// dist a vérif
+			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2(f32(0), f32(0)), angle + f32(pos[id] - 1)*math.pi*2/3)
 		}
 	}
 	return position
+}
+
+fn hexa_world_coo_tri_to_cart(pos []int, main int, current int) vec.Vec2[f32]{
+	rota	:= f32(main - current)*math.pi/3
+	// maybe need tp be fixed
+	dist	:= f32(math.pow(2, pos.len)*math.sqrt(3)/6)
+	// dist a vérif
+	coo_in_triangle :=  coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2(f32(0), f32(0)), rota)
+	return coo_in_triangle
 }
 
 fn coo_cart_to_tria(pos vec.Vec2[f32]) []int{

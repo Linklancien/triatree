@@ -1,6 +1,5 @@
 module main 
 
-// @[assert_continues]
 fn test_neighbors() {
 	println("--------------------")
 	println("test_neighbors():")
@@ -140,7 +139,7 @@ fn test_gravity(){
 	assert gravity([3], 1) == [0] , 'assertion failed for specific: [3]'
 	println("success")
 
-	print("test 2 one [x]: ")
+	print("test 2 one [x], differents centers: ")
 	for center in 1..3{
 		assert gravity([0], center) == [center] , 'assertion failed for specific: [0], center: $center'
 		assert gravity([center], center) == [center] , 'assertion failed for specific: [center], center: $center'
@@ -177,7 +176,30 @@ fn test_gravity(){
 	println("--------------------")
 }
 
-@[assert_continues]
+// utilitary
+fn test_check_reverse(){
+	println("--------------------")
+	println("test_check_reverse():")
+
+	print("test 1 special case: ")
+	assert check_reverse([0]) == false , 'assertion failed for specific: [0]'
+	assert check_reverse([0, 2]) == true , 'assertion failed for specific: [0]'
+	println("success")
+
+	print("test 2: ")
+	mut test := [0]
+	mut value := false
+	for _ in 0..3{
+		assert check_reverse(test) == value , 'assertion failed for specific: [0]'
+		test << [0]
+		value = !value
+	}
+	println("success")
+
+	println("Passed")
+	println("--------------------")
+}
+
 fn test_private() {
 	println("--------------------")
 	println("test_private():")

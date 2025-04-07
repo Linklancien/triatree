@@ -199,14 +199,14 @@ fn gravity(pos []int, center int) []int{
 
 	// next position
 	mut is_center := true
-	for i in 0..(n-1){
+	for i in 0..n{
 		id := n - i - 1
 		if pos[id] != center{
 			is_center = false
 			break
 		}
 	}
-
+	
 	if is_center{
 		return pos
 	}
@@ -329,7 +329,7 @@ fn hexa_near_triangle(current int) []int{
 
 fn check_reverse(pos []int) bool{
 	mut is_reverse := false
-	for elem in pos{
+	for elem in pos[..pos.len-1]{
 		if elem == 0{
 			is_reverse = !is_reverse
 		}

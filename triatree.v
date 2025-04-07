@@ -211,6 +211,10 @@ fn gravity(pos []int, center int) []int{
 		return pos
 	}
 
+	// if pos == [1, 2, 1]{
+	// 	panic("is_reverse: $is_reverse")
+	// }
+
 	nei := neighbors(pos)
 	mut next := pos[..n-1].clone()
 	if is_reverse{
@@ -254,17 +258,37 @@ fn gravity(pos []int, center int) []int{
 				next << center
 			}
 			else{
-				if pos[n-1] != center{
-					next << 0
-				}
-				else{
-					final_co := private(triabase, [0, center, pos[n-1]])[0]
-					for elem in nei{
-						if elem[n-1] == final_co{
-							next = elem.clone()
-							break
+				if pos[n-1] == center{
+					next_final_nei := private(triabase, [0, center])
+
+					if nei.len == 2{
+						for elem in nei{
+							if elem[n-1] == next_final_nei[0] || elem[n-1] == next_final_nei[1]{
+								next = elem.clone()
+								break
+							}
 						}
 					}
+					else {
+						mut final_co := 0
+						if rand.bernoulli(0.5)or {false}{
+							final_co = next_final_nei[0]
+						}
+						else{
+							final_co = next_final_nei[1]
+						}
+
+						for elem in nei{
+							if elem[n-1] == final_co{
+								next = elem.clone()
+								break
+							}
+						}
+
+					}
+				}
+				else{
+					next << 0
 				}
 			}
 		}
@@ -329,6 +353,7 @@ fn hexa_near_triangle(current int) []int{
 
 fn check_reverse(pos []int) bool{
 	mut is_reverse := false
+	// len - 1 the last triangle doesn't interfet in it's own direction
 	for elem in pos[..pos.len-1]{
 		if elem == 0{
 			is_reverse = !is_reverse

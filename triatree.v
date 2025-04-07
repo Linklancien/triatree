@@ -2,6 +2,7 @@ module main
 
 import math
 import math.vec
+import rand
 
 const triabase = [0, 1, 2, 3]
 
@@ -194,56 +195,82 @@ fn (tree Triatree) go_to(pos []int) &Triatree{
 fn gravity(pos []int, center int) []int{
 	n	:= pos.len
 	// count
-	mut is_reverse := false
-	for elem in pos{
-		if elem == 0{
-			is_reverse = !is_reverse
-		}
-	}
+	is_reverse := check_reverse(pos)
 
 	// next position
-	for i in 0..n{
+	mut is_center := true
+	for i in 0..(n-1){
 		id := n - i - 1
 		if pos[id] != center{
-			mut next := pos[..(n-1)].clone()
-			if is_reverse{
-				// reverse orientation
-				if pos[id] == center{
-					next << 0
-					return next
+			is_center = false
+			break
+		}
+	}
+
+	if is_center{
+		return pos
+	}
+
+	nei := neighbors(pos)
+	mut next := pos[..n-1].clone()
+	if is_reverse{
+		match pos[n-1]{
+			0{
+				next_final_nei := private(triabase, [0, center])
+				mut final_co := 0
+				if rand.bernoulli(0.5)or {false}{
+					final_co = next_final_nei[0]
 				}
 				else{
-					next << 0
+					final_co = next_final_nei[1]
 				}
 
-				// adjustements to be of the same dimension
-				new_base := private(triabase, [pos[id]])
-				for finition in (id + 1)..n{
-					next << private(new_base, [pos[finition]])
+				for elem in nei{
+					if elem[n-1] == final_co{
+						next = elem.clone()
+						break
+					}
 				}
-				return next
 			}
 			else{
-				// good orientation
-				if pos[id] == 0{
-					next << center
-					return next
-				}
-				else{
+				if pos[n-1] == center{
 					next << 0
 				}
-
-				// adjustements to be of the same dimension
-				new_base := private(triabase, [pos[id]])
-				for finition in (id + 1)..n{
-					next << private(new_base, [pos[finition]])
+				else{
+					final_co := private(triabase, [0, center, pos[n-1]])[0]
+					for elem in nei{
+						if elem[n-1] == final_co{
+							next = elem.clone()
+							break
+						}
+					}
 				}
-				return next
 			}
 		}
 	}
-	// already at the center
-	return pos
+	else{
+		match pos[n-1]{
+			0{
+				next << center
+			}
+			else{
+				if pos[n-1] != center{
+					next << 0
+				}
+				else{
+					final_co := private(triabase, [0, center, pos[n-1]])[0]
+					for elem in nei{
+						if elem[n-1] == final_co{
+							next = elem.clone()
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return next
 }
 
 // divide & merge
@@ -288,7 +315,8 @@ fn (mut tree Triatree) merge_divide(change Changement){
 	}
 }
 
-// utilitary
+// utilitary:
+
 fn hexa_near_triangle(current int) []int{
 	if current == 0{
 		return [5, 0, 1]
@@ -299,6 +327,15 @@ fn hexa_near_triangle(current int) []int{
 	return [current - 1, current, current + 1]
 }
 
+fn check_reverse(pos []int) bool{
+	mut is_reverse := false
+	for elem in pos{
+		if elem == 0{
+			is_reverse = !is_reverse
+		}
+	}
+	return is_reverse
+}
 // very usefull:
 fn private(base []int, liste []int) []int{
 	mut final := []int{}

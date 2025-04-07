@@ -1,3 +1,5 @@
+module main
+
 // @[assert_continues]
 fn test_neighbors() {
 	println("--------------------")

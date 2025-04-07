@@ -1,3 +1,5 @@
+module main
+
 import math
 import math.vec
 

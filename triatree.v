@@ -64,18 +64,37 @@ fn coo_cart_corners(pos []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 fn hexa_world_coo_tri_to_cart(pos []int, current int) vec.Vec2[f32]{
 	rota	:= f32(current)*math.pi/3 + math.pi/6
 	dist	:= f32(math.pow(2, dimensions_max)/math.sqrt(3))
-	coo_in_triangle :=  coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), rota)
+	coo_in_triangle :=  (coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0)).rotate_around_ccw(vec.Vec2[f32].zero(), rota)
 	return coo_in_triangle
 }
 
 // coo cart_to_tria:
-fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int, rota f32) []int{
+fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []int{
+	// at the start a rota of 0 is when the hugest triangle childs 1 is pointing downward
+	pos := oriented_pos.rotate_around_cw(vec.Vec2[f32].zero(), rota)
+	mut rota := rota_base
+	if rota_base != 0 || rota_base != math.pi{
+		rota_base = 0
+	}
 	if dimension == -1{
 		return []int{}
 	}
 
 	abs_x	:= math.pow(2, dimension)
 	height	:= math.pow(2, dimension)/math.sqrt(3)
+	if pos.y => height/3 || pos.x > abs_x/2 + 2/math.sqrt(3)*pos.y || -pos.x > abs_x/2 + 2/math.sqrt(3)*pos.y {
+		return []int{}
+	}
+
+	mut possible := triabase
+	if pos.y => -height/3{
+		if pos.y =< height*2/3{
+			possible = remove_from_base(possible, [1])
+		}
+	}
+	else{
+		possible = [1]
+	}
 
 	if -abs_x =< pos.x && pos_x =< abs_x{
 		
@@ -85,11 +104,16 @@ fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int, rota f32) []int{
 
 	mut previous_rota := rota
 	if coo == 0{
-		previous_rota = rota + math.pi
+		if rota == math.pi{
+			previous_rota = 0
+		}
+		else{
+			previous_rota = math.pi
+		}
 	}
-	previous_pos	:= pos
 
-	mut final_coo		:= coo_cart_to_tria(previous_pos, dimension-1, previous_rota)
+	previous_pos	:= pos - coo_tria_to_cart([coo], rota)
+	mut final_coo := coo_cart_to_tria(previous_pos, dimension-1, previous_rota)
 	final_coo << [coo]
 	return final_coo
 }
@@ -107,7 +131,7 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32]) (int, []int){
 
 	rota	:= f32(current)*math.pi/3
 	dist	:= f32(math.pow(2, pos.len)/math.sqrt(3))
-	position := pos - vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), rota)
+	position := pos.rotate_around_cw(vec.Vec2[f32].zero(), rota) - vec.vec2[f32](dist, 0)
 	coo := coo_cart_to_tria(position, dimensions_max, 0)
 	
 	return current, coo

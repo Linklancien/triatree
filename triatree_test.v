@@ -19,14 +19,14 @@ fn test_neighbors() {
 				// println(nei)
 				// Only 3 triangle can be one's neighbor
 				assert nei.len == 3 , 'assertion 1 failed for [0, x, y, z]: ${pos}'
-				total := private(triabase, [z])
-				mut ad := private(triabase, [z])
+				total := remove_from_base(triabase, [z])
+				mut ad := remove_from_base(triabase, [z])
 				for elem in nei{
 					assert elem[elem.len-1] != z , 'assertion 2 failed for [0, x, y, z]: ${pos}, elem[elem.len-1]: ${elem[elem.len-1]}'
 					assert elem.len == pos.len , 'assertion 3 failed for [0, x, y, z]: ${pos} : elem: ${elem}'
 					for is_added in total{
 						if is_added == elem[elem.len-1]{
-							ad = private(ad, [elem[elem.len-1]])
+							ad = remove_from_base(ad, [elem[elem.len-1]])
 						}
 					}
 				}
@@ -131,34 +131,34 @@ fn test_hexa_world_neighbors() {
 }
 
 @[assert_continues]
-fn test_private() {
+fn test_remove_from_base() {
 	println("--------------------")
 	println("test_private():")
 
 	print("test 1 usefull: ")
 	base := [0, 1, 2, 3]
-	assert private(base, [0]) == [1, 2, 3] , 'assertion failed for specific: [0]'
-	assert private(base, [1]) == [0, 2, 3] , 'assertion failed for specific: [1]'
-	assert private(base, [2]) == [0, 1, 3] , 'assertion failed for specific: [2]'
-	assert private(base, [3]) == [0, 1, 2] , 'assertion failed for specific: [3]'
+	assert remove_from_base(base, [0]) == [1, 2, 3] , 'assertion failed for specific: [0]'
+	assert remove_from_base(base, [1]) == [0, 2, 3] , 'assertion failed for specific: [1]'
+	assert remove_from_base(base, [2]) == [0, 1, 3] , 'assertion failed for specific: [2]'
+	assert remove_from_base(base, [3]) == [0, 1, 2] , 'assertion failed for specific: [3]'
 
 	for i in 0..5{
-		assert private(base, base[..i]).len == base.len - i , 'assertion failed for i: ${i}'
+		assert remove_from_base(base, base[..i]).len == base.len - i , 'assertion failed for i: ${i}'
 	}
-	assert private(base, []).len == 4 , 'assertion failed for empty []'
-	assert private(base, [5, 6, 7]).len == 4 , 'assertion failed for non in base [5, 6, 7]'
-	assert private(base, [3, 3]).len == 3 , 'assertion failed for repetitive: [3, 3]'
+	assert remove_from_base(base, []).len == 4 , 'assertion failed for empty []'
+	assert remove_from_base(base, [5, 6, 7]).len == 4 , 'assertion failed for non in base [5, 6, 7]'
+	assert remove_from_base(base, [3, 3]).len == 3 , 'assertion failed for repetitive: [3, 3]'
 	println("success")
 
 	print("test 2 extension: ")
 	n := 10
 	ensemble := []int{len: n, init: index}
 	for elem in ensemble{
-		assert private(ensemble, [elem]).len == ensemble.len - 1 , 'assertion failed for elem: ${elem}'
+		assert remove_from_base(ensemble, [elem]).len == ensemble.len - 1 , 'assertion failed for elem: ${elem}'
 	} 
 
 	for i in 0..n{
-		assert private(ensemble, ensemble[..i]).len == ensemble.len - i , 'assertion failed for i: ${i}'
+		assert remove_from_base(ensemble, ensemble[..i]).len == ensemble.len - i , 'assertion failed for i: ${i}'
 	}
 	println("success")
 

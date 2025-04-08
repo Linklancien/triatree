@@ -3,7 +3,8 @@ module main
 import math
 import math.vec
 
-const triabase = [0, 1, 2, 3]
+const triabase			= [0, 1, 2, 3]
+const dimensions_max	= 20
 
 type Self = Cara | Childs 
 
@@ -12,7 +13,7 @@ struct Triatree {
 	compo		Self	
 	
 	pos			[]int
-	dimensions	int		// 0 le plus petit
+	dimension	int		// 0 le plus petit
 }
 
 struct Childs {
@@ -32,32 +33,51 @@ fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32]{
 	mut position := vec.vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0..pos.len{
-		n := pos.len - 1 - id
+		n := dimensions_max - 1 - id
 		if pos[id] == 0{
 			angle += math.pi
 		}
 		else{
 			dist := f32(math.pow(2, n)/math.sqrt(3))
-			// dist a vérif
-			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2(f32(0), f32(0)), angle + f32(pos[id] - 1)*math.pi*2/3)
+			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + f32(pos[id] - 1)*math.pi*2/3)
 		}
 	}
 	return position
 }
 
+fn coo_cart_corners(pos []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2[f32]){
+	center_pos := coo_tria_to_cart(pos, rota)
+	mut angle := rota
+	for id in 0..pos.len{
+		n := pos.len - 1 - id
+		if pos[id] == 0{
+			angle += math.pi
+		}
+	}
+	dist := f32(math.pow(2, dimensions_max - pos.len)/math.sqrt(3))
+	pos1	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi*9/6)
+	pos2	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi/6)
+	pos3	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi*5/6)
+	return pos1, pos2, pos3
+}
+
 fn hexa_world_coo_tri_to_cart(pos []int, current int) vec.Vec2[f32]{
-	rota	:= f32(current)*math.pi/3
-	// maybe need tp be fixed
-	dist	:= f32(math.pow(2, pos.len)/math.sqrt(3))
-	// dist a vérif
-	coo_in_triangle :=  coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2(f32(0), f32(0)), rota)
+	rota	:= f32(current)*math.pi/3 + math.pi/6
+	dist	:= f32(math.pow(2, dimensions_max)/math.sqrt(3))
+	coo_in_triangle :=  coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), rota)
 	return coo_in_triangle
 }
 
 // coo cart_to_tria:
-fn coo_cart_to_tria(pos vec.Vec2[f32]) []int{
-	// to complete
-	panic("Not completed")
+fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int{
+	if dimension == -1{
+		return []int{}
+	}
+	abs_x := math.pow(2, dimension)
+	mut coo := [0]
+	previous_pos	:= pos
+	previous		:= coo_cart_to_tria(previous_pos, dimension-1)
+
 	return [0]
 }
 
@@ -71,10 +91,11 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32]) (int, []int){
 			break
 		}
 	}
+
 	rota	:= f32(current)*math.pi/3
 	dist	:= f32(math.pow(2, pos.len)/math.sqrt(3))
-	position := pos - vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2(f32(0), f32(0)), rota)
-	coo := coo_cart_to_tria(position)
+	position := pos - vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), rota)
+	coo := coo_cart_to_tria(position, dimensions_max)
 	
 	return current, coo
 }
@@ -229,7 +250,7 @@ enum Changement {
 fn (mut tree Triatree) merge_divide(change Changement){
 	match change{
 		.divide{
-			if tree.dimensions > 0{
+			if tree.dimension > 0{
 				match tree.compo{
 					Cara{
 						mut pos_0 := tree.pos.clone()
@@ -241,10 +262,10 @@ fn (mut tree Triatree) merge_divide(change Changement){
 						mut pos_3 := tree.pos.clone()
 						pos_3 << [3]
 						tree.compo = Childs{
-							mid	:	Triatree{compo: tree.compo, pos: pos_0, dimensions: (tree.dimensions - 1)}
-							up	:	Triatree{compo: tree.compo, pos: pos_1, dimensions: (tree.dimensions - 1)}
-							left:	Triatree{compo: tree.compo, pos: pos_2, dimensions: (tree.dimensions - 1)}
-							right:	Triatree{compo: tree.compo, pos: pos_3, dimensions: (tree.dimensions - 1)}
+							mid	:	Triatree{compo: tree.compo, pos: pos_0, dimension: (tree.dimension - 1)}
+							up	:	Triatree{compo: tree.compo, pos: pos_1, dimension: (tree.dimension - 1)}
+							left:	Triatree{compo: tree.compo, pos: pos_2, dimension: (tree.dimension - 1)}
+							right:	Triatree{compo: tree.compo, pos: pos_3, dimension: (tree.dimension - 1)}
 						}
 					}
 					else{}

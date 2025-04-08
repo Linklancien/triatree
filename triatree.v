@@ -52,6 +52,7 @@ fn coo_cart_to_tria(pos vec.Vec2[f32]) []int {
 }
 
 // NEIGHBORS:
+
 fn neighbors(pos []int) [][]int {
 	n := pos.len
 	mut nei := [][]int{}
@@ -168,6 +169,7 @@ fn hexa_world_neighbors(pos []int, current int) ([]int, [][]int) {
 	return []int{len: 3, init: current}, directs_neighbors
 }
 
+// follow the path in the triatree while the childs exist
 fn (tree Triatree) go_to(pos []int) &Triatree {
 	if pos == tree.pos {
 		return &tree
@@ -281,60 +283,44 @@ fn gravity(pos []int, center int) []int {
 	return next
 }
 
-// divide & merge
-enum Changement {
-	divide
-	merge
-}
+// divide & merge:
 
-fn (mut tree Triatree) merge_divide(change Changement) {
-	match change {
-		.divide {
-			if tree.dimensions > 0 {
-				match tree.compo {
-					Cara {
-						mut pos_0 := tree.pos.clone()
-						pos_0 << [0]
-						mut pos_1 := tree.pos.clone()
-						pos_1 << [1]
-						mut pos_2 := tree.pos.clone()
-						pos_2 << [2]
-						mut pos_3 := tree.pos.clone()
-						pos_3 << [3]
-						tree.compo = Childs{
-							mid:   Triatree{
-								compo:      tree.compo
-								pos:        pos_0
-								dimensions: (tree.dimensions - 1)
-							}
-							up:    Triatree{
-								compo:      tree.compo
-								pos:        pos_1
-								dimensions: (tree.dimensions - 1)
-							}
-							left:  Triatree{
-								compo:      tree.compo
-								pos:        pos_2
-								dimensions: (tree.dimensions - 1)
-							}
-							right: Triatree{
-								compo:      tree.compo
-								pos:        pos_3
-								dimensions: (tree.dimensions - 1)
-							}
-						}
+fn (mut tree Triatree) divide() {
+	if tree.dimensions > 0 {
+		match tree.compo {
+			Cara {
+				mut pos_0 := tree.pos.clone()
+				pos_0 << [0]
+				mut pos_1 := tree.pos.clone()
+				pos_1 << [1]
+				mut pos_2 := tree.pos.clone()
+				pos_2 << [2]
+				mut pos_3 := tree.pos.clone()
+				pos_3 << [3]
+				tree.compo = Childs{
+					mid:   Triatree{
+						compo:      tree.compo
+						pos:        pos_0
+						dimensions: (tree.dimensions - 1)
 					}
-					else {}
+					up:    Triatree{
+						compo:      tree.compo
+						pos:        pos_1
+						dimensions: (tree.dimensions - 1)
+					}
+					left:  Triatree{
+						compo:      tree.compo
+						pos:        pos_2
+						dimensions: (tree.dimensions - 1)
+					}
+					right: Triatree{
+						compo:      tree.compo
+						pos:        pos_3
+						dimensions: (tree.dimensions - 1)
+					}
 				}
 			}
-		}
-		.merge {
-			match tree.compo {
-				Childs {
-					// trouver parmis les childs si les cara sont les mêmes ?
-				}
-				else {}
-			}
+			else {}
 		}
 	}
 }

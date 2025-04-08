@@ -64,7 +64,7 @@ fn neighbors(pos []int) [][]int{
 
 	nei << pos[..n-1]
 	nei[0] << [0]
-	mut to_ad := private(triabase, [0, pos[n-1]])
+	mut to_ad := remove_from_base(triabase, [0, pos[n-1]])
 
 	// au sein du même triangle, le triangle {1, 2, 3} sera toujours opposé au triangle [0]x{1, 2, 3}, pour la même valeur
 	// 1 out of 3
@@ -86,13 +86,13 @@ fn neighbors(pos []int) [][]int{
 			else{
 				// pos[id] appartient a {1, 2, 3}\{pos[n-1]}
 				if to_ad.len == 2{
-					possible := private(to_ad, [pos[id]])
+					possible := remove_from_base(to_ad, [pos[id]])
 					if possible.len == 1{
 						nei << pos[..id]
 						nei[nei.len-1] << [0]
 						nei[nei.len-1] << []int{len: tempo_id, init: possible[0]}
 
-						to_ad = private(to_ad, possible)
+						to_ad = remove_from_base(to_ad, possible)
 						first_stop = pos[id]
 					}
 				}
@@ -100,15 +100,14 @@ fn neighbors(pos []int) [][]int{
 					nei << pos[..id]
 					mut orientation := [0]
 					if pos[id] == 0{
-						orientation = private(triabase, [0, pos[n-1], to_ad[0]])
+						orientation = remove_from_base(triabase, [0, pos[n-1], to_ad[0]])
 					}
 					nei[nei.len-1] << orientation
 
+					new_base := remove_from_base(triabase, [pos[id], orientation[0]])
 					// new_base.len == 2 
-					// adjustements to be of the same dimension
-					new_base := private(triabase, [pos[id], orientation[0]])
 					for finition in (id + 1)..n{
-						nei[nei.len-1] << private(new_base, [pos[finition]])
+						nei[nei.len-1] << remove_from_base(new_base, [pos[finition]])
 					}
 					
 					return nei
@@ -147,7 +146,7 @@ fn hexa_world_neighbors(pos []int, current int) ([]int, [][]int){
 			}
 			else{
 				other = pos[id]
-				nei << private(possible, [pos[id]])
+				nei << remove_from_base(possible, [pos[id]])
 			}
 		}
 		directs_neighbors << nei
@@ -362,7 +361,7 @@ fn check_reverse(pos []int) bool{
 	return is_reverse
 }
 // very usefull:
-fn private(base []int, liste []int) []int{
+fn remove_from_base(base []int, liste []int) []int{
 	mut final := []int{}
 	for elem in base{
 		mut not_private := true

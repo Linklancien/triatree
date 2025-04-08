@@ -81,23 +81,27 @@ fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []
 
 	abs_x	:= math.pow(2, dimension)
 	height	:= abs_x*math.sqrt(3)
-	if pos.y >= height/3 || pos.x > abs_x/2 + 2/math.sqrt(3)*pos.y || -pos.x > abs_x/2 + 2/math.sqrt(3)*pos.y {
+
+	// using math:
+	ratio_out := abs_x/3 + pos.y/math.sqrt(3)
+	if pos.y >= height/3 || pos.x > ratio_out || -pos.x > ratio_out {
 		return []int{}
 	}
 	
 	mut coo := 0
+	ratio_in :=  pos.y/math.sqrt(3) - abs_x/6
 	if pos.y <= -height/3{
 		coo = 1
 	}
-	// else if{
-		
-	// }
-	// else if{
-		
-	// }
-	// else{
-	// 	coo = 0
-	// }
+	else if pos.x < ratio_in {
+		coo = 3
+	}
+	else if -pos.x < ratio_in {
+		coo = 2
+	}
+	else{
+		coo = 0
+	}
 
 
 	mut previous_rota := rota

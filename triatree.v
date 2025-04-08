@@ -219,7 +219,7 @@ fn gravity(pos []int, center int) []int{
 	if is_reverse{
 		match pos[n-1]{
 			0{
-				next_final_nei := private(triabase, [0, center])
+				next_final_nei := remove_from_base(triabase, [0, center])
 				mut final_co := 0
 				if rand.bernoulli(0.5)or {false}{
 					final_co = next_final_nei[0]
@@ -240,7 +240,7 @@ fn gravity(pos []int, center int) []int{
 					next << 0
 				}
 				else{
-					final_co := private(triabase, [0, center, pos[n-1]])[0]
+					final_co := remove_from_base(triabase, [0, center, pos[n-1]])[0]
 					for elem in nei{
 						if elem[n-1] == final_co{
 							next = elem.clone()
@@ -258,7 +258,7 @@ fn gravity(pos []int, center int) []int{
 			}
 			else{
 				if pos[n-1] == center{
-					next_final_nei := private(triabase, [0, center])
+					next_final_nei := remove_from_base(triabase, [0, center])
 
 					if nei.len == 2{
 						for elem in nei{

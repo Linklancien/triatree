@@ -143,7 +143,7 @@ fn test_gravity(){
 	for center in 1..3{
 		assert gravity([0], center) == [center] , 'assertion failed for specific: [0], center: $center'
 		assert gravity([center], center) == [center] , 'assertion failed for specific: [center], center: $center'
-		others := private([1, 2, 3], [center])
+		others := remove_from_base([1, 2, 3], [center])
 		assert gravity([others[0]], center) == [0] , 'assertion failed for specific: [0], center: $center, others: ${others[0]}'
 		assert gravity([others[1]], center) == [0] , 'assertion failed for specific: [0], center: $center, others: ${others[1]}'
 	}
@@ -169,7 +169,7 @@ fn test_gravity(){
 						}
 						else{
 							mut count := 0
-							for test in private([1, 2, 3], [center]){
+							for test in remove_from_base([1, 2, 3], [center]){
 								if next[next.len-1] == test{
 									count += 1
 								}
@@ -179,10 +179,10 @@ fn test_gravity(){
 					}
 					else{
 						// z isn't the center here
-						for test in private([1, 2, 3], [center]){
+						for test in remove_from_base([1, 2, 3], [center]){
 							if z == test{
 								if is_reverse{
-									assert next[next.len-1] == private([1, 2, 3], [z, center])[0], 'assertion failed pos: $pos, next: $next, center: $center, is_reverse: $is_reverse'
+									assert next[next.len-1] == remove_from_base([1, 2, 3], [z, center])[0], 'assertion failed pos: $pos, next: $next, center: $center, is_reverse: $is_reverse'
 									break
 								}
 								else{
@@ -194,7 +194,7 @@ fn test_gravity(){
 						if z == 0 {
 							if is_reverse{
 								mut count := 0
-								for test in private([1, 2, 3], [center]){
+								for test in remove_from_base([1, 2, 3], [center]){
 									if next[next.len-1] == test{
 										count += 1
 									}

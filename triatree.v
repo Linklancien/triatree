@@ -13,7 +13,7 @@ struct Triatree {
 	compo		Self	
 	
 	pos			[]int
-	dimension	int		// 0 le plus petit
+	dimension	int		// entre dimensions_max et 0
 }
 
 struct Childs {
@@ -55,7 +55,7 @@ fn coo_cart_corners(pos []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 		}
 	}
 	dist := f32(math.pow(2, dimensions_max - pos.len)/math.sqrt(3))
-	pos1	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi*9/6)
+	pos1	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi*3/2)
 	pos2	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi/6)
 	pos3	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi*5/6)
 	return pos1, pos2, pos3
@@ -69,16 +69,29 @@ fn hexa_world_coo_tri_to_cart(pos []int, current int) vec.Vec2[f32]{
 }
 
 // coo cart_to_tria:
-fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int{
+fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int, rota f32) []int{
 	if dimension == -1{
 		return []int{}
 	}
-	abs_x := math.pow(2, dimension)
-	mut coo := [0]
-	previous_pos	:= pos
-	previous		:= coo_cart_to_tria(previous_pos, dimension-1)
 
-	return [0]
+	abs_x	:= math.pow(2, dimension)
+	height	:= math.pow(2, dimension)/math.sqrt(3)
+
+	if -abs_x =< pos.x && pos_x =< abs_x{
+		
+	}
+	coo := 0
+
+
+	mut previous_rota := rota
+	if coo == 0{
+		previous_rota = rota + math.pi
+	}
+	previous_pos	:= pos
+
+	mut final_coo		:= coo_cart_to_tria(previous_pos, dimension-1, previous_rota)
+	final_coo << [coo]
+	return final_coo
 }
 
 fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32]) (int, []int){
@@ -95,7 +108,7 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32]) (int, []int){
 	rota	:= f32(current)*math.pi/3
 	dist	:= f32(math.pow(2, pos.len)/math.sqrt(3))
 	position := pos - vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), rota)
-	coo := coo_cart_to_tria(position, dimensions_max)
+	coo := coo_cart_to_tria(position, dimensions_max, 0)
 	
 	return current, coo
 }

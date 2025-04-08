@@ -39,7 +39,7 @@ fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32]{
 		}
 		else{
 			dist := f32(math.pow(2, n)/math.sqrt(3))
-			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + f32(pos[id] - 1)*math.pi*2/3)
+			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)), angle + f32(pos[id] - 1)*math.pi*2/3)
 		}
 	}
 	return position
@@ -49,57 +49,55 @@ fn coo_cart_corners(pos []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 	center_pos := coo_tria_to_cart(pos, rota)
 	mut angle := rota
 	for id in 0..pos.len{
-		n := pos.len - 1 - id
 		if pos[id] == 0{
 			angle += math.pi
 		}
 	}
 	dist := f32(math.pow(2, dimensions_max - pos.len)/math.sqrt(3))
-	pos1	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi*3/2)
-	pos2	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi/6)
-	pos3	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.Vec2[f32].zero(), angle + math.pi*5/6)
+	pos1	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)), angle + math.pi*3/2)
+	pos2	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)), angle + math.pi/6)
+	pos3	:= center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)), angle + math.pi*5/6)
 	return pos1, pos2, pos3
 }
 
 fn hexa_world_coo_tri_to_cart(pos []int, current int) vec.Vec2[f32]{
 	rota	:= f32(current)*math.pi/3 + math.pi/6
 	dist	:= f32(math.pow(2, dimensions_max)/math.sqrt(3))
-	coo_in_triangle :=  (coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0)).rotate_around_ccw(vec.Vec2[f32].zero(), rota)
+	coo_in_triangle :=  (coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0)).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)), rota)
 	return coo_in_triangle
 }
 
 // coo cart_to_tria:
 fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []int{
 	// at the start a rota of 0 is when the hugest triangle childs 1 is pointing downward
-	pos := oriented_pos.rotate_around_cw(vec.Vec2[f32].zero(), rota)
+	pos := oriented_pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)), rota_base)
 	mut rota := rota_base
 	if rota_base != 0 || rota_base != math.pi{
-		rota_base = 0
+		rota = 0
 	}
 	if dimension == -1{
 		return []int{}
 	}
 
 	abs_x	:= math.pow(2, dimension)
-	height	:= math.pow(2, dimension)/math.sqrt(3)
-	if pos.y => height/3 || pos.x > abs_x/2 + 2/math.sqrt(3)*pos.y || -pos.x > abs_x/2 + 2/math.sqrt(3)*pos.y {
+	height	:= abs_x*math.sqrt(3)
+	if pos.y >= height/3 || pos.x > abs_x/2 + 2/math.sqrt(3)*pos.y || -pos.x > abs_x/2 + 2/math.sqrt(3)*pos.y {
 		return []int{}
 	}
-
-	mut possible := triabase
-	if pos.y => -height/3{
-		if pos.y =< height*2/3{
-			possible = remove_from_base(possible, [1])
-		}
+	
+	mut coo := 0
+	if pos.y <= -height/3{
+		coo = 1
 	}
-	else{
-		possible = [1]
-	}
-
-	if -abs_x =< pos.x && pos_x =< abs_x{
+	// else if{
 		
-	}
-	coo := 0
+	// }
+	// else if{
+		
+	// }
+	// else{
+	// 	coo = 0
+	// }
 
 
 	mut previous_rota := rota
@@ -130,8 +128,8 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32]) (int, []int){
 	}
 
 	rota	:= f32(current)*math.pi/3
-	dist	:= f32(math.pow(2, pos.len)/math.sqrt(3))
-	position := pos.rotate_around_cw(vec.Vec2[f32].zero(), rota) - vec.vec2[f32](dist, 0)
+	dist	:= f32(math.pow(2, dimensions_max)/math.sqrt(3))
+	position := pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)), rota) - vec.vec2[f32](dist, 0)
 	coo := coo_cart_to_tria(position, dimensions_max, 0)
 	
 	return current, coo

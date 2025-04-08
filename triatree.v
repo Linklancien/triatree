@@ -45,8 +45,8 @@ fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32]{
 	return position
 }
 
-fn hexa_world_coo_tri_to_cart(pos []int, main int, current int) vec.Vec2[f32]{
-	rota	:= f32(main - current)*math.pi/3
+fn hexa_world_coo_tri_to_cart(pos []int, current int) vec.Vec2[f32]{
+	rota	:= f32(current)*math.pi/3
 	// maybe need tp be fixed
 	dist	:= f32(math.pow(2, pos.len)/math.sqrt(3))
 	// dist a vérif
@@ -61,10 +61,22 @@ fn coo_cart_to_tria(pos vec.Vec2[f32]) []int{
 	return [0]
 }
 
-fn hexa_world_coo_cart_to_tria(pos []int, main int, current int) (int, []int){
+fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32]) (int, []int){
 	// to complete
-	panic("Not completed")
-	return main, [0]
+	mut current := 0
+	angle := pos.angle()
+	for i in 0..6{
+		if i*math.pi/3 <= angle && (i + 1)*math.pi/3 <= angle{
+			current = i
+			break
+		}
+	}
+	rota	:= f32(current)*math.pi/3
+	dist	:= f32(math.pow(2, pos.len)/math.sqrt(3))
+	position := pos - vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2(f32(0), f32(0)), rota)
+	coo := coo_cart_to_tria(position)
+	
+	return current, coo
 }
 
 // neighbors

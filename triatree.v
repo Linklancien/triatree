@@ -192,6 +192,8 @@ fn (tree Triatree) go_to(pos []int) &Triatree {
 }
 
 // PHYSIC:
+// TODO: prendre en compte si les case sont occupé lorsque 2 cases peuvent être les suivantes
+// maybe change by adding a new fonction
 
 // take a position, and a corner toward is applied the gravity and return the next likely position
 fn gravity(pos []int, center int) []int {

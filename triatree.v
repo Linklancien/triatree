@@ -4,7 +4,7 @@ import math
 import math.vec
 
 const triabase = [0, 1, 2, 3]
-const dimensions_max = 20
+const dimensions_max = 3
 
 type Self = Cara | Childs
 
@@ -33,13 +33,19 @@ fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32] {
 	mut position := vec.vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0 .. pos.len {
-		n := dimensions_max - 1 - id
+		n := pos.len - 1 - id
+		dist := f32(math.pow(2, n - 1) / math.sqrt(3))
 		if pos[id] == 0 {
 			angle += math.pi
-		} else {
-			dist := f32(math.pow(2, n) / math.sqrt(3))
+		} else if pos[id] == 1 {
 			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0),
-				f32(0)), angle + f32(pos[id] - 1) * math.pi * 2 / 3)
+				f32(0)), angle - math.pi / 2)
+		} else if pos[id] == 2 {
+			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0),
+				f32(0)), angle + math.pi / 6)
+		} else if pos[id] == 3 {
+			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0),
+				f32(0)), angle + math.pi * 5 / 6)
 		}
 	}
 	return position
@@ -65,9 +71,9 @@ fn coo_cart_corners(pos []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 	return pos1, pos2, pos3
 }
 
-fn hexa_world_coo_tri_to_cart(pos []int, current int) vec.Vec2[f32] {
+fn hexa_world_coo_tria_to_cart(pos []int, current int) vec.Vec2[f32] {
 	rota := f32(current) * math.pi / 3 + math.pi / 6
-	dist := f32(math.pow(2, dimensions_max) / math.sqrt(3))
+	dist := f32(math.pow(2, pos.len) / math.sqrt(3))
 	coo_in_triangle := (coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0)).rotate_around_ccw(vec.vec2[f32](f32(0),
 		f32(0)), rota)
 	return coo_in_triangle
@@ -86,17 +92,17 @@ fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []
 	}
 
 	abs_x := math.pow(2, dimension)
-	height := abs_x * math.sqrt(3)
 
 	// using math:
-	ratio_out := abs_x / 3 + pos.y / math.sqrt(3)
-	if pos.y >= height / 3 || pos.x > ratio_out || -pos.x > ratio_out {
+	ratio_out := pos.y / math.sqrt(3) + abs_x / 3
+	if pos.y >= abs_x / (2 * math.sqrt(3)) || pos.x > ratio_out || -pos.x > ratio_out {
+		// panic('Not in trianlge dim: $dimension, \n pos: $pos \n ${pos.y >= abs_x /(2* math.sqrt(3))} \n ${pos.x > ratio_out} \n ${-pos.x > ratio_out}')
 		return []int{}
 	}
 
 	mut coo := 0
 	ratio_in := pos.y / math.sqrt(3) - abs_x / 6
-	if pos.y <= -height / 3 {
+	if pos.y <= -abs_x / (4 * math.sqrt(3)) {
 		coo = 1
 	} else if pos.x < ratio_in {
 		coo = 3
@@ -115,9 +121,21 @@ fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []
 		}
 	}
 
-	previous_pos := pos - coo_tria_to_cart([coo], rota)
-	mut final_coo := coo_cart_to_tria(previous_pos, dimension - 1, previous_rota)
-	final_coo << [coo]
+	mut actual_pos := vec.vec2[f32](f32(0), f32(0))
+	dist := f32(math.pow(2, dimension - 1) / math.sqrt(3))
+	if coo == 1 {
+		actual_pos += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)),
+			-math.pi / 2)
+	} else if coo == 2 {
+		actual_pos += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)),
+			math.pi / 6)
+	} else if coo == 3 {
+		actual_pos += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)),
+			math.pi * 5 / 6)
+	}
+	previous_pos := pos - actual_pos
+	mut final_coo := [coo]
+	final_coo << coo_cart_to_tria(previous_pos, dimension - 1, previous_rota)
 	return final_coo
 }
 

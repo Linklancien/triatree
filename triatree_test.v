@@ -1,5 +1,31 @@
 module main
 
+fn test_coos() {
+	println('--------------------')
+	println('test_hexa_world_neighbors():')
+
+	print('test 1 bijection:')
+	for x in 0 .. 4 {
+		for y in 0 .. 4 {
+			for z in 0 .. 4 {
+				coo := [x, y, z]
+				pos := coo_tria_to_cart(coo, 0)
+				new_coo := coo_cart_to_tria(pos, coo.len - 1, 0)
+				new_pos := coo_tria_to_cart(new_coo, 0)
+				println('${pos.magnitude()}, ${new_pos.magnitude()}')
+
+				assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
+				assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
+			}
+		}
+	}
+
+	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
 // @[assert_continues]
 fn test_neighbors() {
 	println('--------------------')

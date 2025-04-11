@@ -2,7 +2,7 @@ module main
 
 fn test_coos() {
 	println('--------------------')
-	println('test_hexa_world_neighbors():')
+	println('test_coos():')
 
 	print('test 1 bijection:')
 	for x in 0 .. 4 {
@@ -12,7 +12,6 @@ fn test_coos() {
 				pos := coo_tria_to_cart(coo, 0)
 				new_coo := coo_cart_to_tria(pos, coo.len - 1, 0)
 				new_pos := coo_tria_to_cart(new_coo, 0)
-				println('${pos.magnitude()}, ${new_pos.magnitude()}')
 
 				assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
 				assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
@@ -24,14 +23,13 @@ fn test_coos() {
 	for x in 0 .. 4 {
 		for y in 0 .. 4 {
 			for z in 0 .. 4 {
-				for r in 0..4{
-					for s in 0..4{
-						for t in 0..4{
+				for r in 0 .. 4 {
+					for s in 0 .. 4 {
+						for t in 0 .. 4 {
 							coo := [x, y, z, r, s, t]
 							pos := coo_tria_to_cart(coo, 0)
 							new_coo := coo_cart_to_tria(pos, coo.len - 1, 0)
 							new_pos := coo_tria_to_cart(new_coo, 0)
-							println('${pos.magnitude()}, ${new_pos.magnitude()}')
 
 							assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
 							assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
@@ -42,6 +40,31 @@ fn test_coos() {
 		}
 	}
 	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
+fn test_hexa_world_coos() {
+	println('--------------------')
+	println('test_hexa_world_neighbors():')
+
+	print('test 1 bijection:')
+	for c in 0 .. 6 {
+		for x in 0 .. 4 {
+			for y in 0 .. 4 {
+				for z in 0 .. 4 {
+					coo := [x, y, z]
+					pos := hexa_world_coo_tria_to_cart(coo, c)
+					new_coo, new_c := hexa_world_coo_cart_to_tria(pos, coo.len)
+					new_pos := hexa_world_coo_tria_to_cart(new_coo, new_c)
+
+					assert coo == new_coo, 'assertion failed: \n coo ${coo}, c ${c}, pos.magnitude() ${pos.magnitude()}, pos ${pos} \n new_coo ${new_coo}, new_c ${new_c}, new_pos.magnitude() ${new_pos.magnitude()}, new_pos ${new_pos} '
+					assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: \n coo ${coo}, c ${c}, pos.magnitude() ${pos.magnitude()}, pos ${pos} \n new_coo ${new_coo}, new_c ${new_c}, new_pos.magnitude() ${new_pos.magnitude()}, new_pos ${new_pos} '
+				}
+			}
+		}
+	}
 
 	println('Passed')
 	println('--------------------')

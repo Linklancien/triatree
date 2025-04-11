@@ -28,7 +28,8 @@ struct Cara {
 	// quantitées intensives
 }
 
-// coo tria_to_cart:
+// COO TRIA TO CART:
+
 fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32] {
 	mut position := vec.vec2[f32](0.0, 0.0)
 	mut angle := rota
@@ -79,7 +80,8 @@ fn hexa_world_coo_tria_to_cart(pos []int, current int) vec.Vec2[f32] {
 	return coo_in_triangle
 }
 
-// coo cart_to_tria:
+// COO CART TO TRIA:
+
 fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []int {
 	// at the start a rota of 0 is when the hugest triangle childs 1 is pointing downward
 	pos := oriented_pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)), rota_base)
@@ -139,7 +141,7 @@ fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []
 	return final_coo
 }
 
-fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32]) (int, []int) {
+fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32], dimension_precision int) ([]int, int) {
 	// to complete
 	mut current := 0
 	angle := pos.angle()
@@ -151,15 +153,15 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32]) (int, []int) {
 	}
 
 	rota := f32(current) * math.pi / 3
-	dist := f32(math.pow(2, dimensions_max) / math.sqrt(3))
-	position := pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)), rota) - vec.vec2[f32](dist,
-		0)
-	coo := coo_cart_to_tria(position, dimensions_max, 0)
+	dist := f32(math.pow(2, dimension_precision) / math.sqrt(3))
+	position := pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)), rota) - vec.vec2[f32](dist, 0)
+	coo := coo_cart_to_tria(position, dimension_precision, 0)
 
-	return current, coo
+	return coo, current
 }
 
-// neighbors
+// NEIGHBORS:
+
 fn neighbors(pos []int) [][]int {
 	n := pos.len
 	mut nei := [][]int{}

@@ -12,7 +12,7 @@ struct Triatree {
 mut:
 	compo Self
 
-	pos       []int
+	coo       []int
 	dimension int
 	// entre dimensions_max et 0
 }
@@ -30,21 +30,21 @@ struct Cara {
 
 // COO TRIA TO CART:
 
-fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32] {
+fn coo_tria_to_cart(coo []int, rota f32) vec.Vec2[f32] {
 	mut position := vec.vec2[f32](0.0, 0.0)
 	mut angle := rota
-	for id in 0 .. pos.len {
-		n := pos.len - 1 - id
+	for id in 0 .. coo.len {
+		n := coo.len - 1 - id
 		dist := f32(math.pow(2, n - 1) / math.sqrt(3))
-		if pos[id] == 0 {
+		if coo[id] == 0 {
 			angle += math.pi
-		} else if pos[id] == 1 {
+		} else if coo[id] == 1 {
 			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0),
 				f32(0)), angle - math.pi / 2)
-		} else if pos[id] == 2 {
+		} else if coo[id] == 2 {
 			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0),
 				f32(0)), angle + math.pi / 6)
-		} else if pos[id] == 3 {
+		} else if coo[id] == 3 {
 			position += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0),
 				f32(0)), angle + math.pi * 5 / 6)
 		}
@@ -52,15 +52,15 @@ fn coo_tria_to_cart(pos []int, rota f32) vec.Vec2[f32] {
 	return position
 }
 
-fn coo_cart_corners(pos []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2[f32]) {
-	center_pos := coo_tria_to_cart(pos, rota)
+fn coo_cart_corners(coo []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2[f32]) {
+	center_pos := coo_tria_to_cart(coo, rota)
 	mut angle := rota
-	for id in 0 .. pos.len {
-		if pos[id] == 0 {
+	for id in 0 .. coo.len {
+		if coo[id] == 0 {
 			angle += math.pi
 		}
 	}
-	dist := f32(math.pow(2, dimensions_max - pos.len) / math.sqrt(3))
+	dist := f32(math.pow(2, dimensions_max - coo.len) / math.sqrt(3))
 	pos1 := center_pos +
 		vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)), angle +
 		math.pi * 3 / 2)
@@ -72,10 +72,10 @@ fn coo_cart_corners(pos []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 	return pos1, pos2, pos3
 }
 
-fn hexa_world_coo_tria_to_cart(pos []int, current int) vec.Vec2[f32] {
+fn hexa_world_coo_tria_to_cart(coo []int, current int) vec.Vec2[f32] {
 	rota := f32(current) * math.pi / 3 + math.pi / 6
-	dist := f32(math.pow(2, pos.len) / math.sqrt(3))
-	coo_in_triangle := (coo_tria_to_cart(pos, rota) + vec.vec2[f32](dist, 0)).rotate_around_ccw(vec.vec2[f32](f32(0),
+	dist := f32(math.pow(2, coo.len) / math.sqrt(3))
+	coo_in_triangle := (coo_tria_to_cart(coo, rota) + vec.vec2[f32](dist, 0)).rotate_around_ccw(vec.vec2[f32](f32(0),
 		f32(0)), rota)
 	return coo_in_triangle
 }
@@ -125,8 +125,10 @@ fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
 			math.pi * 5 / 6)
 	}
 
-	// compute the position relative to the child center + rotate the position if the triangle is upside down/ if the cild is 0
+	// compute the position relative to the child center 
 	mut previous_pos := pos - actual_pos
+
+	// rotate the position if the triangle is upside down == the child is 0
 	if coo == 0 {
 		previous_pos = previous_pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)),
 			math.pi)
@@ -158,65 +160,65 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32], dimension_precision int) ([]in
 
 // NEIGHBORS:
 
-fn neighbors(pos []int) [][]int {
-	n := pos.len
+fn neighbors(coo []int) [][]int {
+	n := coo.len
 	mut nei := [][]int{}
-	if pos[n - 1] == 0 {
+	if coo[n - 1] == 0 {
 		// 0 is the center of the triangle so it's neighbors can only be 1 2 3 of the same triangle
 		for i in 1 .. 4 {
-			nei << pos[..n - 1]
+			nei << coo[..n - 1]
 			nei[nei.len - 1] << [i]
 		}
 		return nei
 	}
 
-	nei << pos[..n - 1]
+	nei << coo[..n - 1]
 	nei[0] << [0]
-	mut to_ad := remove_from_base(triabase, [0, pos[n - 1]])
+	mut to_ad := remove_from_base(triabase, [0, coo[n - 1]])
 
 	// au sein du même triangle, le triangle {1, 2, 3} sera toujours opposé au triangle [0]x{1, 2, 3}, pour la même valeur
 	// 1 out of 3
 	mut first_stop := -1
 	for tempo_id in 0 .. n {
 		id := n - tempo_id - 1
-		if pos[id] != pos[n - 1] && pos[id] != first_stop {
-			if pos[id] == 0 && to_ad.len == 2 {
-				if pos == [0, 0, 1, 2] {
+		if coo[id] != coo[n - 1] && coo[id] != first_stop {
+			if coo[id] == 0 && to_ad.len == 2 {
+				if coo == [0, 0, 1, 2] {
 					panic(to_ad)
 				}
-				nei << pos[..id]
+				nei << coo[..id]
 				nei[nei.len - 1] << to_ad[0]
 				nei[nei.len - 1] << []int{len: tempo_id, init: to_ad[1]}
 
-				nei << pos[..id]
+				nei << coo[..id]
 				nei[nei.len - 1] << to_ad[1]
 				nei[nei.len - 1] << []int{len: tempo_id, init: to_ad[0]}
 				return nei
 			} else {
-				// pos[id] appartient a {1, 2, 3}\{pos[n-1]}
+				// coo[id] appartient a {1, 2, 3}\{coo[n-1]}
 				if to_ad.len == 2 {
-					possible := remove_from_base(to_ad, [pos[id]])
+					possible := remove_from_base(to_ad, [coo[id]])
 					if possible.len == 1 {
-						nei << pos[..id]
+						nei << coo[..id]
 						nei[nei.len - 1] << [0]
 						nei[nei.len - 1] << []int{len: tempo_id, init: possible[0]}
 
 						to_ad = remove_from_base(to_ad, possible)
-						first_stop = pos[id]
+						first_stop = coo[id]
 					}
 				} else if to_ad.len == 1 {
-					nei << pos[..id]
+					nei << coo[..id]
 					mut orientation := [0]
-					if pos[id] == 0 {
-						orientation = remove_from_base(triabase, [0, pos[n - 1], to_ad[0]])
+					if coo[id] == 0 {
+						orientation = remove_from_base(triabase, [0, coo[n - 1], to_ad[0]])
 					}
 					nei[nei.len - 1] << orientation
 
-					new_base := remove_from_base(triabase, [pos[id], orientation[0]])
+					new_base := remove_from_base(triabase, [coo[id], orientation[0]])
 
 					// new_base.len == 2
 					for finition in (id + 1) .. n {
-						nei[nei.len - 1] << remove_from_base(new_base, [pos[finition]])
+						nei[nei.len - 1] << remove_from_base(new_base, [coo[finition]])
 					}
 
 					return nei
@@ -228,18 +230,18 @@ fn neighbors(pos []int) [][]int {
 	return nei
 }
 
-fn hexa_world_neighbors(pos []int, current int) ([]int, [][]int) {
-	if pos == [] {
+fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
+	if coo == [] {
 		near := hexa_near_triangle(current)
 		return [near[0], near[2]], [[]int{}, []int{}]
 	}
 
-	mut directs_neighbors := neighbors(pos)
+	mut directs_neighbors := neighbors(coo)
 
 	if directs_neighbors.len == 1 {
-		if pos[0] == 1 {
-			directs_neighbors << []int{len: pos.len, init: 1}
-			directs_neighbors << []int{len: pos.len, init: 1}
+		if coo[0] == 1 {
+			directs_neighbors << []int{len: coo.len, init: 1}
+			directs_neighbors << []int{len: coo.len, init: 1}
 
 			// the order doesn't mater because they are all [1, 1, ..., 1]
 			// this is the nearest of the center of the world
@@ -250,12 +252,12 @@ fn hexa_world_neighbors(pos []int, current int) ([]int, [][]int) {
 		mut nei := []int{}
 		possible := [2, 3]
 		mut other := -1
-		for id in 0 .. pos.len {
-			if pos[id] == 1 {
+		for id in 0 .. coo.len {
+			if coo[id] == 1 {
 				nei << [1]
 			} else {
-				other = pos[id]
-				nei << remove_from_base(possible, [pos[id]])
+				other = coo[id]
+				nei << remove_from_base(possible, [coo[id]])
 			}
 		}
 		directs_neighbors << nei
@@ -269,26 +271,26 @@ fn hexa_world_neighbors(pos []int, current int) ([]int, [][]int) {
 		return near, directs_neighbors
 	}
 
-	// else{panic("A 0 without 3 neigbors in it's base ??? pos: ${pos} current: ${current}")}
-	// pos is inside a triangle
+	// else{panic("A 0 without 3 neigbors in it's base ??? coo: ${coo} current: ${current}")}
+	// coo is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
 }
 
 // find
-fn (tree Triatree) go_to(pos []int) &Triatree {
-	if pos == tree.pos {
+fn (tree Triatree) go_to(coo []int) &Triatree {
+	if coo == tree.coo {
 		return &tree
 	}
 	match tree.compo {
 		Childs {
-			if pos[0] == 0 {
-				return tree.compo.mid.go_to(pos[1..])
-			} else if pos[0] == 1 {
-				return tree.compo.mid.go_to(pos[1..])
-			} else if pos[0] == 2 {
-				return tree.compo.mid.go_to(pos[1..])
-			} else if pos[0] == 3 {
-				return tree.compo.mid.go_to(pos[1..])
+			if coo[0] == 0 {
+				return tree.compo.mid.go_to(coo[1..])
+			} else if coo[0] == 1 {
+				return tree.compo.mid.go_to(coo[1..])
+			} else if coo[0] == 2 {
+				return tree.compo.mid.go_to(coo[1..])
+			} else if coo[0] == 3 {
+				return tree.compo.mid.go_to(coo[1..])
 			}
 		}
 		else {}
@@ -308,33 +310,33 @@ fn (mut tree Triatree) merge_divide(change Changement) {
 			if tree.dimension > 0 {
 				match tree.compo {
 					Cara {
-						mut pos_0 := tree.pos.clone()
+						mut pos_0 := tree.coo.clone()
 						pos_0 << [0]
-						mut pos_1 := tree.pos.clone()
+						mut pos_1 := tree.coo.clone()
 						pos_1 << [1]
-						mut pos_2 := tree.pos.clone()
+						mut pos_2 := tree.coo.clone()
 						pos_2 << [2]
-						mut pos_3 := tree.pos.clone()
+						mut pos_3 := tree.coo.clone()
 						pos_3 << [3]
 						tree.compo = Childs{
 							mid:   Triatree{
 								compo:     tree.compo
-								pos:       pos_0
+								coo:       pos_0
 								dimension: (tree.dimension - 1)
 							}
 							up:    Triatree{
 								compo:     tree.compo
-								pos:       pos_1
+								coo:       pos_1
 								dimension: (tree.dimension - 1)
 							}
 							left:  Triatree{
 								compo:     tree.compo
-								pos:       pos_2
+								coo:       pos_2
 								dimension: (tree.dimension - 1)
 							}
 							right: Triatree{
 								compo:     tree.compo
-								pos:       pos_3
+								coo:       pos_3
 								dimension: (tree.dimension - 1)
 							}
 						}

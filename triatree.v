@@ -1,11 +1,11 @@
 module main
 
 import math
-import math.vec
+import math.vec {Vec2, vec2}
 import rand
 
 const triabase = [0, 1, 2, 3]
-const center = vec.vec2[f32](f32(0), f32(0))
+const center = vec2[f32](f32(0), f32(0))
 
 // to delete:
 const dimensions_max = 3
@@ -35,7 +35,7 @@ struct Cara {
 
 // COO TRIA TO CART:
 fn coo_tria_to_cart(coo []int, rota f32) vec.Vec2[f32] {
-	mut position := vec.vec2[f32](0.0, 0.0)
+	mut position := vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0 .. coo.len {
 		n := coo.len - 1 - id
@@ -43,11 +43,11 @@ fn coo_tria_to_cart(coo []int, rota f32) vec.Vec2[f32] {
 		if coo[id] == 0 {
 			angle += math.pi
 		} else if coo[id] == 1 {
-			position += vec.vec2[f32](dist, 0).rotate_around_ccw(center, angle - math.pi / 2)
+			position += vec2[f32](dist, 0).rotate_around_ccw(center, angle - math.pi / 2)
 		} else if coo[id] == 2 {
-			position += vec.vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi / 6)
+			position += vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi / 6)
 		} else if coo[id] == 3 {
-			position += vec.vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi * 5 / 6)
+			position += vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi * 5 / 6)
 		}
 	}
 	return position
@@ -56,7 +56,7 @@ fn coo_tria_to_cart(coo []int, rota f32) vec.Vec2[f32] {
 fn hexa_world_coo_tria_to_cart(coo []int, current int) vec.Vec2[f32] {
 	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, coo.len) / math.sqrt(3))
-	coo_in_triangle := (coo_tria_to_cart(coo, 0) + vec.vec2[f32](0, dist)).rotate_around_ccw(center,
+	coo_in_triangle := (coo_tria_to_cart(coo, 0) + vec2[f32](0, dist)).rotate_around_ccw(center,
 		rota)
 	return coo_in_triangle
 }
@@ -71,9 +71,9 @@ fn coo_cart_corners(coo []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 		}
 	}
 	dist := f32(math.pow(2, dimensions_max - coo.len) / math.sqrt(3))
-	pos1 := center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi * 3 / 2)
-	pos2 := center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi / 6)
-	pos3 := center_pos + vec.vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi * 5 / 6)
+	pos1 := center_pos + vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi * 3 / 2)
+	pos2 := center_pos + vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi / 6)
+	pos3 := center_pos + vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi * 5 / 6)
 	return pos1, pos2, pos3
 }
 
@@ -107,15 +107,15 @@ fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
 		coo = 0
 	}
 
-	// compute ce position of the child compare of the center of the current triangle
+	// compute the position of the child compare of the center of the current triangle
 	mut actual_pos := center
 	dist := f32(math.pow(2, dimension - 1) / math.sqrt(3))
 	if coo == 1 {
-		actual_pos += vec.vec2[f32](dist, 0).rotate_around_ccw(center, -math.pi / 2)
+		actual_pos += vec2[f32](dist, 0).rotate_around_ccw(center, -math.pi / 2)
 	} else if coo == 2 {
-		actual_pos += vec.vec2[f32](dist, 0).rotate_around_ccw(center, math.pi / 6)
+		actual_pos += vec2[f32](dist, 0).rotate_around_ccw(center, math.pi / 6)
 	} else if coo == 3 {
-		actual_pos += vec.vec2[f32](dist, 0).rotate_around_ccw(center, math.pi * 5 / 6)
+		actual_pos += vec2[f32](dist, 0).rotate_around_ccw(center, math.pi * 5 / 6)
 	}
 
 	// compute the position relative to the child center
@@ -150,7 +150,7 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32], dimension_precision int) ([]in
 
 	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, dimension_precision) / math.sqrt(3))
-	position := pos.rotate_around_cw(center, rota) - vec.vec2[f32](0, dist)
+	position := pos.rotate_around_cw(center, rota) - vec2[f32](0, dist)
 	coo := coo_cart_to_tria(position, dimension_precision - 1)
 
 	return coo, current
@@ -300,7 +300,7 @@ fn (tree Triatree) go_to(coo []int) &Triatree {
 // TODO: prendre en compte si les case sont occupé lorsque 2 cases peuvent être les suivantes
 // maybe change by adding a new fonction
 
-// take a position, and a corner toward is applied the gravity and return the next likely position
+// take a position, and a corner toward wich is applied the gravity and return the next likely position
 fn gravity(coo []int, center int) []int {
 	n := coo.len
 

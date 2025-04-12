@@ -107,7 +107,7 @@ fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
 		coo = 0
 	}
 
-	// compute the position of the child compare of the center of the current triangle
+	// compute the position of the child compare to the center of the current triangle
 	mut actual_pos := center
 	dist := f32(math.pow(2, dimension - 1) / math.sqrt(3))
 	if coo == 1 {

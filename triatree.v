@@ -9,8 +9,8 @@ const center = vec.vec2[f32](f32(0), f32(0))
 
 // to delete:
 const dimensions_max = 3
-//
 
+//
 type Self = Cara | Childs
 
 struct Triatree {
@@ -34,7 +34,6 @@ struct Cara {
 }
 
 // COO TRIA TO CART:
-
 fn coo_tria_to_cart(coo []int, rota f32) vec.Vec2[f32] {
 	mut position := vec.vec2[f32](0.0, 0.0)
 	mut angle := rota
@@ -62,7 +61,7 @@ fn hexa_world_coo_tria_to_cart(coo []int, current int) vec.Vec2[f32] {
 	return coo_in_triangle
 }
 
-// return the pos of the 3 corners of a triangle in order [1, 2, 3]
+// return the coo of the 3 corners of a triangle in order [1, 2, 3]
 fn coo_cart_corners(coo []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2[f32]) {
 	center_pos := coo_tria_to_cart(coo, rota)
 	mut angle := rota
@@ -79,7 +78,6 @@ fn coo_cart_corners(coo []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 }
 
 // COO CART TO TRIA:
-
 fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
 	// at the start the child 1 of the hugest triangle is pointing downward
 	if dimension == -1 {
@@ -159,7 +157,6 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32], dimension_precision int) ([]in
 }
 
 // NEIGHBORS:
-
 fn neighbors(coo []int) [][]int {
 	n := coo.len
 	mut nei := [][]int{}
@@ -221,13 +218,11 @@ fn neighbors(coo []int) [][]int {
 						nei[nei.len - 1] << remove_from_base(new_base, [coo[finition]])
 					}
 
-
 					return nei
 				}
 			}
 		}
 	}
-
 
 	return nei
 }
@@ -251,7 +246,6 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 		}
 	}
 	if directs_neighbors.len <= 2 {
-	if directs_neighbors.len <= 2 {
 		mut nei := []int{}
 		possible := [2, 3]
 		mut other := -1
@@ -267,15 +261,14 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 		tria_nei := hexa_near_triangle(current)
 		mut near := [tria_nei[1]]
 		if other == 2 {
-		if other == 2 {
-			near << [tria_nei[2]]
-		} else if other == 3 {
-			near << [tria_nei[1]]
+			if other == 2 {
+				near << [tria_nei[2]]
+			} else if other == 3 {
+				near << [tria_nei[1]]
+			}
+			return near, directs_neighbors
 		}
-		return near, directs_neighbors
-		return near, directs_neighbors
 	}
-
 	// else{panic("A 0 without 3 neigbors in it's base ??? coo: ${coo} current: ${current}")}
 	// coo is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
@@ -299,7 +292,6 @@ fn (tree Triatree) go_to(coo []int) &Triatree {
 			}
 		}
 		else {}
-		else {}
 	}
 	return &tree
 }
@@ -309,31 +301,31 @@ fn (tree Triatree) go_to(coo []int) &Triatree {
 // maybe change by adding a new fonction
 
 // take a position, and a corner toward is applied the gravity and return the next likely position
-fn gravity(pos []int, center int) []int {
-	n := pos.len
+fn gravity(coo []int, center int) []int {
+	n := coo.len
 
-	is_reverse := check_reverse(pos)
+	is_reverse := check_reverse(coo)
 
 	// next position:
 
-	// check if the current pos is at the gravity center
+	// check if the current coo is at the gravity center
 	mut is_center := true
 	for i in 0 .. n {
 		id := n - i - 1
-		if pos[id] != center {
+		if coo[id] != center {
 			is_center = false
 			break
 		}
 	}
 
 	if is_center {
-		return pos
+		return coo
 	}
 
-	nei := neighbors(pos)
-	mut next := pos[..n - 1].clone()
+	nei := neighbors(coo)
+	mut next := coo[..n - 1].clone()
 	if is_reverse {
-		if pos[n - 1] == 0 {
+		if coo[n - 1] == 0 {
 			next_final_nei := remove_from_base(triabase, [0, center])
 			mut final_co := 0
 			if rand.bernoulli(0.5) or { false } {
@@ -349,10 +341,10 @@ fn gravity(pos []int, center int) []int {
 					break
 				}
 			}
-		} else if pos[n - 1] == center {
+		} else if coo[n - 1] == center {
 			next << 0
 		} else {
-			final_co := remove_from_base(triabase, [0, center, pos[n - 1]])[0]
+			final_co := remove_from_base(triabase, [0, center, coo[n - 1]])[0]
 			for elem in nei {
 				if elem[n - 1] == final_co {
 					next = elem.clone()
@@ -361,9 +353,9 @@ fn gravity(pos []int, center int) []int {
 			}
 		}
 	} else {
-		if pos[n - 1] == 0 {
+		if coo[n - 1] == 0 {
 			next << center
-		} else if pos[n - 1] == center {
+		} else if coo[n - 1] == center {
 			next_final_nei := remove_from_base(triabase, [0, center])
 
 			if nei.len == 2 {
@@ -399,39 +391,38 @@ fn gravity(pos []int, center int) []int {
 }
 
 // divide & merge:
-
 fn (mut tree Triatree) divide() {
-	if tree.dimensions > 0 {
+	if tree.dimension > 0 {
 		match tree.compo {
 			Cara {
-				mut pos_0 := tree.pos.clone()
+				mut pos_0 := tree.coo.clone()
 				pos_0 << [0]
-				mut pos_1 := tree.pos.clone()
+				mut pos_1 := tree.coo.clone()
 				pos_1 << [1]
-				mut pos_2 := tree.pos.clone()
+				mut pos_2 := tree.coo.clone()
 				pos_2 << [2]
-				mut pos_3 := tree.pos.clone()
+				mut pos_3 := tree.coo.clone()
 				pos_3 << [3]
 				tree.compo = Childs{
 					mid:   Triatree{
 						compo:      tree.compo
-						pos:        pos_0
-						dimensions: (tree.dimensions - 1)
+						coo:        pos_0
+						dimension: (tree.dimension - 1)
 					}
 					up:    Triatree{
 						compo:      tree.compo
-						pos:        pos_1
-						dimensions: (tree.dimensions - 1)
+						coo:        pos_1
+						dimension: (tree.dimension - 1)
 					}
 					left:  Triatree{
 						compo:      tree.compo
-						pos:        pos_2
-						dimensions: (tree.dimensions - 1)
+						coo:        pos_2
+						dimension: (tree.dimension - 1)
 					}
 					right: Triatree{
 						compo:      tree.compo
-						pos:        pos_3
-						dimensions: (tree.dimensions - 1)
+						coo:        pos_3
+						dimension: (tree.dimension - 1)
 					}
 				}
 			}
@@ -453,11 +444,11 @@ fn hexa_near_triangle(current int) []int {
 }
 
 // for a considered pos, return if the triangle is pointing upward -> true, or downward -> false by default all triangle are considered pointing downward
-fn check_reverse(pos []int) bool {
+fn check_reverse(coo []int) bool {
 	mut is_reverse := false
 
 	// len - 1 the last triangle doesn't interfet in it's own direction
-	for elem in pos[..pos.len - 1] {
+	for elem in coo[..coo.len - 1] {
 		if elem == 0 {
 			is_reverse = !is_reverse
 		}

@@ -59,8 +59,9 @@ fn test_hexa_world_coos() {
 					new_coo, new_c := hexa_world_coo_cart_to_tria(pos, coo.len)
 					new_pos := hexa_world_coo_tria_to_cart(new_coo, new_c)
 
-					assert coo == new_coo, 'assertion failed: \n coo ${coo}, c ${c}, pos.magnitude() ${pos.magnitude()}, pos ${pos} \n new_coo ${new_coo}, new_c ${new_c}, new_pos.magnitude() ${new_pos.magnitude()}, new_pos ${new_pos} '
-					assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: \n coo ${coo}, c ${c}, pos.magnitude() ${pos.magnitude()}, pos ${pos} \n new_coo ${new_coo}, new_c ${new_c}, new_pos.magnitude() ${new_pos.magnitude()}, new_pos ${new_pos} '
+					assert coo == new_coo, 'assertion failed: \n coo ${coo}, c ${c} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo}, new_c ${new_c} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
+					assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: \n coo ${coo}, c ${c} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo}, new_c ${new_c} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
+					assert c == new_c, 'assertion failed c: ${c}, new_c: ${new_c}'
 				}
 			}
 		}

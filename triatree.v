@@ -54,13 +54,14 @@ fn coo_tria_to_cart(coo []int, rota f32) vec.Vec2[f32] {
 }
 
 fn hexa_world_coo_tria_to_cart(coo []int, current int) vec.Vec2[f32] {
-	rota := f32(current) * math.pi / 3 + math.pi / 6
+	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, coo.len) / math.sqrt(3))
-	coo_in_triangle := (coo_tria_to_cart(coo, rota) + vec.vec2[f32](0, dist)).rotate_around_ccw(center,
+	coo_in_triangle := (coo_tria_to_cart(coo, 0) + vec.vec2[f32](0, dist)).rotate_around_ccw(center,
 		rota)
 	return coo_in_triangle
 }
 
+// return the pos of the 3 corners of a triangle in order [1, 2, 3]
 fn coo_cart_corners(coo []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2[f32]) {
 	center_pos := coo_tria_to_cart(coo, rota)
 	mut angle := rota
@@ -79,7 +80,7 @@ fn coo_cart_corners(coo []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 // COO CART TO TRIA:
 
 fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
-	// at the start the child 1 of hugest triangle is pointing downward
+	// at the start the child 1 of the hugest triangle is pointing downward
 	if dimension == -1 {
 		return []int{}
 	}
@@ -133,19 +134,25 @@ fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
 
 fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32], dimension_precision int) ([]int, int) {
 	// to complete
-	mut current := 0
-	angle := pos.angle()
+	mut current := -1
+	mut angle := pos.angle()
+	if angle < 0 {
+		angle += 2 * math.pi
+	}
 	for i in 0 .. 6 {
-		if i * math.pi / 3 <= angle && (i + 1) * math.pi / 3 <= angle {
+		if i * math.pi / 3 <= angle && angle <= (i + 1) * math.pi / 3 {
 			current = i
 			break
 		}
 	}
+	if current == -1 {
+		panic('Not found, pos: ${pos}, angle: ${angle}')
+	}
 
-	rota := f32(current) * math.pi / 3 + math.pi / 6
+	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, dimension_precision) / math.sqrt(3))
 	position := pos.rotate_around_cw(center, rota) - vec.vec2[f32](0, dist)
-	coo := coo_cart_to_tria(position, dimension_precision-1)
+	coo := coo_cart_to_tria(position, dimension_precision - 1)
 
 	return coo, current
 }

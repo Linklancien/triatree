@@ -1,7 +1,7 @@
 module main
 
 import math
-import math.vec {Vec2, vec2}
+import math.vec { Vec2, vec2 }
 import rand
 
 const triabase = [0, 1, 2, 3]
@@ -34,7 +34,7 @@ struct Cara {
 }
 
 // COO TRIA TO CART:
-fn coo_tria_to_cart(coo []int, rota f32) vec.Vec2[f32] {
+fn coo_tria_to_cart(coo []int, rota f32) Vec2[f32] {
 	mut position := vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0 .. coo.len {
@@ -53,7 +53,7 @@ fn coo_tria_to_cart(coo []int, rota f32) vec.Vec2[f32] {
 	return position
 }
 
-fn hexa_world_coo_tria_to_cart(coo []int, current int) vec.Vec2[f32] {
+fn hexa_world_coo_tria_to_cart(coo []int, current int) Vec2[f32] {
 	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, coo.len) / math.sqrt(3))
 	coo_in_triangle := (coo_tria_to_cart(coo, 0) + vec2[f32](0, dist)).rotate_around_ccw(center,
@@ -62,7 +62,7 @@ fn hexa_world_coo_tria_to_cart(coo []int, current int) vec.Vec2[f32] {
 }
 
 // return the coo of the 3 corners of a triangle in order [1, 2, 3]
-fn coo_cart_corners(coo []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2[f32]) {
+fn coo_cart_corners(coo []int, rota f32) (Vec2[f32], Vec2[f32], Vec2[f32]) {
 	center_pos := coo_tria_to_cart(coo, rota)
 	mut angle := rota
 	for id in 0 .. coo.len {
@@ -78,7 +78,7 @@ fn coo_cart_corners(coo []int, rota f32) (vec.Vec2[f32], vec.Vec2[f32], vec.Vec2
 }
 
 // COO CART TO TRIA:
-fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
+fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// at the start the child 1 of the hugest triangle is pointing downward
 	if dimension == -1 {
 		return []int{}
@@ -131,7 +131,7 @@ fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
 	return final_coo
 }
 
-fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32], dimension_precision int) ([]int, int) {
+fn hexa_world_coo_cart_to_tria(pos Vec2[f32], dimension_precision int) ([]int, int) {
 	// to complete
 	mut current := -1
 	mut angle := pos.angle()
@@ -405,23 +405,23 @@ fn (mut tree Triatree) divide() {
 				pos_3 << [3]
 				tree.compo = Childs{
 					mid:   Triatree{
-						compo:      tree.compo
-						coo:        pos_0
+						compo:     tree.compo
+						coo:       pos_0
 						dimension: (tree.dimension - 1)
 					}
 					up:    Triatree{
-						compo:      tree.compo
-						coo:        pos_1
+						compo:     tree.compo
+						coo:       pos_1
 						dimension: (tree.dimension - 1)
 					}
 					left:  Triatree{
-						compo:      tree.compo
-						coo:        pos_2
+						compo:     tree.compo
+						coo:       pos_2
 						dimension: (tree.dimension - 1)
 					}
 					right: Triatree{
-						compo:      tree.compo
-						coo:        pos_3
+						compo:     tree.compo
+						coo:       pos_3
 						dimension: (tree.dimension - 1)
 					}
 				}

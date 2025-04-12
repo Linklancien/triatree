@@ -270,7 +270,9 @@ fn test_gravity() {
 						if z == 0 {
 							if is_reverse {
 								mut count := 0
-								for test in remove_from_base([1, 2, 3], [gravity_center]) {
+								for test in remove_from_base([1, 2, 3], [
+									gravity_center,
+								]) {
 									if next[next.len - 1] == test {
 										count += 1
 									}

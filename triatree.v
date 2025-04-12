@@ -94,7 +94,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 		return []int{}
 	}
 
-	// check in wich child of the triangle is the position
+	// check in which child of the triangle is the position
 	mut coo := 0
 	ratio_in := pos.y / math.sqrt(3) - abs_x / 6
 	if pos.y <= -abs_x / (4 * math.sqrt(3)) {
@@ -107,7 +107,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 		coo = 0
 	}
 
-	// compute the position of the child compare to the center of the current triangle
+	// compute the position of the child compared to the center of the current triangle
 	mut actual_pos := center
 	dist := f32(math.pow(2, dimension - 1) / math.sqrt(3))
 	if coo == 1 {
@@ -161,7 +161,7 @@ fn neighbors(coo []int) [][]int {
 	n := coo.len
 	mut nei := [][]int{}
 	if coo[n - 1] == 0 {
-		// 0 is the center of the triangle so it's neighbors can only be 1 2 3 of the same triangle
+		// 0 is the center of the triangle so its neighbors can only be 1 2 3 of the same triangle
 		for i in 1 .. 4 {
 			nei << coo[..n - 1]
 			nei[nei.len - 1] << [i]
@@ -240,7 +240,7 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 			directs_neighbors << []int{len: coo.len, init: 1}
 			directs_neighbors << []int{len: coo.len, init: 1}
 
-			// the order doesn't mater because they are all [1, 1, ..., 1]
+			// the order doesn't matter because they are all [1, 1, ..., 1]
 			// this is the nearest of the center of the world
 			return hexa_near_triangle(current), directs_neighbors
 		}
@@ -300,7 +300,7 @@ fn (tree Triatree) go_to(coo []int) &Triatree {
 // TODO: prendre en compte si les case sont occupé lorsque 2 cases peuvent être les suivantes
 // maybe change by adding a new fonction
 
-// take a position, and a corner toward wich is applied the gravity and return the next likely position
+// take a position, and a corner towards which is applied the gravity and return the next likely position
 fn gravity(coo []int, center int) []int {
 	n := coo.len
 
@@ -359,7 +359,7 @@ fn gravity(coo []int, center int) []int {
 			next_final_nei := remove_from_base(triabase, [0, center])
 
 			if nei.len == 2 {
-				// in this case there is only one of the two neighbors wich is closer to the center of gravity
+				// in this case there is only one of the two neighbors which is closer to the center of gravity
 				for elem in nei {
 					if elem[n - 1] == next_final_nei[0] || elem[n - 1] == next_final_nei[1] {
 						next = elem.clone()

@@ -82,13 +82,8 @@ fn hexa_world_coo_tria_to_cart(pos []int, current int) vec.Vec2[f32] {
 
 // COO CART TO TRIA:
 
-fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []int {
-	// at the start a rota of 0 is when the hugest triangle childs 1 is pointing downward
-	pos := oriented_pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)), rota_base)
-	mut rota := rota_base
-	if rota_base != 0 || rota_base != math.pi {
-		rota = 0
-	}
+fn coo_cart_to_tria(pos vec.Vec2[f32], dimension int) []int {
+	// at the start the child 1 of hugest triangle is pointing downward
 	if dimension == -1 {
 		return []int{}
 	}
@@ -96,12 +91,14 @@ fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []
 	abs_x := math.pow(2, dimension)
 
 	// using math:
+	// check if the position is inside the triangle
 	ratio_out := pos.y / math.sqrt(3) + abs_x / 3
 	if pos.y >= abs_x / (2 * math.sqrt(3)) || pos.x > ratio_out || -pos.x > ratio_out {
 		// panic('Not in trianlge dim: $dimension, \n pos: $pos \n ${pos.y >= abs_x /(2* math.sqrt(3))} \n ${pos.x > ratio_out} \n ${-pos.x > ratio_out}')
 		return []int{}
 	}
 
+	// check in wich chil of the triangle is the position
 	mut coo := 0
 	ratio_in := pos.y / math.sqrt(3) - abs_x / 6
 	if pos.y <= -abs_x / (4 * math.sqrt(3)) {
@@ -114,15 +111,7 @@ fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []
 		coo = 0
 	}
 
-	mut previous_rota := rota
-	if coo == 0 {
-		if rota == math.pi {
-			previous_rota = 0
-		} else {
-			previous_rota = math.pi
-		}
-	}
-
+	// compute ce position of the child compare of the center of the current triangle
 	mut actual_pos := vec.vec2[f32](f32(0), f32(0))
 	dist := f32(math.pow(2, dimension - 1) / math.sqrt(3))
 	if coo == 1 {
@@ -135,9 +124,16 @@ fn coo_cart_to_tria(oriented_pos vec.Vec2[f32], dimension int, rota_base f32) []
 		actual_pos += vec.vec2[f32](dist, 0).rotate_around_ccw(vec.vec2[f32](f32(0), f32(0)),
 			math.pi * 5 / 6)
 	}
-	previous_pos := pos - actual_pos
+
+	// compute the position relative to the child center + rotate the position if the triangle is upside down/ if the cild is 0
+	mut previous_pos := pos - actual_pos
+	if coo == 0 {
+		previous_pos = previous_pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)),
+			math.pi)
+	}
+
 	mut final_coo := [coo]
-	final_coo << coo_cart_to_tria(previous_pos, dimension - 1, previous_rota)
+	final_coo << coo_cart_to_tria(previous_pos, dimension - 1)
 	return final_coo
 }
 
@@ -155,7 +151,7 @@ fn hexa_world_coo_cart_to_tria(pos vec.Vec2[f32], dimension_precision int) ([]in
 	rota := f32(current) * math.pi / 3
 	dist := f32(math.pow(2, dimension_precision) / math.sqrt(3))
 	position := pos.rotate_around_cw(vec.vec2[f32](f32(0), f32(0)), rota) - vec.vec2[f32](dist, 0)
-	coo := coo_cart_to_tria(position, dimension_precision, 0)
+	coo := coo_cart_to_tria(position, dimension_precision)
 
 	return coo, current
 }

@@ -10,7 +10,7 @@ fn test_coos() {
 			for z in 0 .. 4 {
 				coo := [x, y, z]
 				pos := coo_tria_to_cart(coo, 0)
-				new_coo := coo_cart_to_tria(pos, coo.len - 1, 0)
+				new_coo := coo_cart_to_tria(pos, coo.len - 1)
 				new_pos := coo_tria_to_cart(new_coo, 0)
 
 				assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
@@ -28,7 +28,7 @@ fn test_coos() {
 						for t in 0 .. 4 {
 							coo := [x, y, z, r, s, t]
 							pos := coo_tria_to_cart(coo, 0)
-							new_coo := coo_cart_to_tria(pos, coo.len - 1, 0)
+							new_coo := coo_cart_to_tria(pos, coo.len - 1)
 							new_pos := coo_tria_to_cart(new_coo, 0)
 
 							assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '

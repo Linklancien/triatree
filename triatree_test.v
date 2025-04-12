@@ -71,7 +71,6 @@ fn test_hexa_world_coos() {
 	println('--------------------')
 }
 
-// @[assert_continues]
 fn test_neighbors() {
 	println('--------------------')
 	println('test_neighbors():')
@@ -206,7 +205,115 @@ fn test_hexa_world_neighbors() {
 	println('--------------------')
 }
 
-@[assert_continues]
+fn test_gravity() {
+	println('--------------------')
+	println('test_gravity():')
+	print('test 1 special case: ')
+	assert gravity([0], 1) == [1], 'assertion failed for specific: [0]'
+	assert gravity([1], 1) == [1], 'assertion failed for specific: [1]'
+	assert gravity([2], 1) == [0], 'assertion failed for specific: [2]'
+	assert gravity([3], 1) == [0], 'assertion failed for specific: [3]'
+	println('success')
+
+	print('test 2 one [x], differents centers: ')
+	for center in 1 .. 3 {
+		assert gravity([0], center) == [center], 'assertion failed for specific: [0], center: ${center}'
+		assert gravity([center], center) == [center], 'assertion failed for specific: [center], center: ${center}'
+		others := remove_from_base([1, 2, 3], [center])
+		assert gravity([others[0]], center) == [0], 'assertion failed for specific: [0], center: ${center}, others: ${others[0]}'
+		assert gravity([others[1]], center) == [0], 'assertion failed for specific: [0], center: ${center}, others: ${others[1]}'
+	}
+	println('success')
+
+	print('test 3 more [x, y, z]: ')
+	for center in 1 .. 3 {
+		for x in 0 .. 3 {
+			for y in 0 .. 3 {
+				for z in 0 .. 3 {
+					pos := [x, y, z]
+					is_reverse := check_reverse(pos)
+					next := gravity(pos, center)
+
+					assert next.len == pos.len, 'assertion failed for lens : pos: ${pos}, next: ${next}, center: ${center}'
+
+					if z == center {
+						if z == x && z == y {
+							assert next == pos, 'assertion failed z center pos: ${pos}, next: ${next}, center: ${center}, also know as the extrem position'
+						} else if is_reverse {
+							assert next == [x, y, 0], 'assertion failed z center pos: ${pos}, next: ${next}, center: ${center}, is_reverse: ${is_reverse}'
+						} else {
+							mut count := 0
+							for test in remove_from_base([1, 2, 3], [center]) {
+								if next[next.len - 1] == test {
+									count += 1
+								}
+							}
+							assert count == 1, 'assertion failed z center pos: ${pos}, next: ${next}, center: ${center}, is_reverse: ${is_reverse}'
+						}
+					} else {
+						// z isn't the center here
+						for test in remove_from_base([1, 2, 3], [center]) {
+							if z == test {
+								if is_reverse {
+									assert next[next.len - 1] == remove_from_base([1, 2, 3],
+										[z, center])[0], 'assertion failed pos: ${pos}, next: ${next}, center: ${center}, is_reverse: ${is_reverse}'
+									break
+								} else {
+									assert next == [x, y, 0], 'assertion failed pos: ${pos}, next: ${next}, center: ${center}, is_reverse: ${is_reverse}'
+									break
+								}
+							}
+						}
+						if z == 0 {
+							if is_reverse {
+								mut count := 0
+								for test in remove_from_base([1, 2, 3], [center]) {
+									if next[next.len - 1] == test {
+										count += 1
+									}
+								}
+								assert count == 1, 'assertion failed z center pos: ${pos}, next: ${next}, center: ${center}, is_reverse: ${is_reverse}'
+							} else {
+								assert next == [x, y, center], 'assertion failed z = 0 pos: ${pos}, next: ${next}, center: ${center}, is_reverse: ${is_reverse}'
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
+// utilitary
+fn test_check_reverse() {
+	println('--------------------')
+	println('test_check_reverse():')
+
+	print('test 1 special case: ')
+	assert check_reverse([0]) == false, 'assertion failed for specific: [0]'
+	assert check_reverse([0, 2]) == true, 'assertion failed for specific: [0]'
+	assert check_reverse([0, 0, 0]) == false, 'assertion failed for specific: [0]'
+	println('success')
+
+	print('test 2: ')
+	mut test := [0]
+	mut value := false
+	for _ in 0 .. 3 {
+		assert check_reverse(test) == value, 'assertion failed for specific: [0]'
+		test << [0]
+		value = !value
+	}
+	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
 fn test_remove_from_base() {
 	println('--------------------')
 	println('test_private():')

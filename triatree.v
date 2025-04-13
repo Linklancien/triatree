@@ -14,53 +14,44 @@ enum Elements {
 }
 
 const elements_caras = {
-	Elements.wood: Cara{color: gg.Color{125, 125, 125, 255}}
+	Elements.wood: Cara{
+		color: gg.Color{125, 125, 125, 255}
+	}
 }
-
 
 struct Cara {
 	// quantitées intensives
-	color	gg.Color	
+	color gg.Color
 }
 
 type Self = Elements | Childs
 
 struct Triatree_Ensemble {
-	mut:
-	next_id	int
-	liste_tree	[]triatree
-}
-
-fn (ensemble Triatree_Ensemble) find_index_of_id(id int) int{
-	for index in 0..ensemble.liste_tree.len{
-		if ensemble.liste_tree[index].id == id{
-			return index
-		}
-	}
-	panic("Not found")
-	return -1
+mut:
+	free_index []int
+	liste_tree []Triatree
 }
 
 struct Hexa_world {
-	world	[]Triatree_Ensemble
+	world []Triatree_Ensemble
 }
 
 struct Triatree {
 mut:
 	compo Self
 
-	id			int
-	dimension	int		// entre dimensions_max et 0
-	coo			[]int
+	id        int
+	dimension int
+	// entre dimensions_max et 0
+	coo []int
 }
 
 struct Childs {
-	mid   Triatree
-	up    Triatree
-	left  Triatree
-	right Triatree
+	mid   int
+	up    int
+	left  int
+	right int
 }
-
 
 // COO TRIA TO CART:
 fn coo_tria_to_cart(coo []int, rota f32) Vec2[f32] {
@@ -298,48 +289,48 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 			return near, directs_neighbors
 		}
 	}
+
 	// else{panic("A 0 without 3 neigbors in it's base ??? coo: ${coo} current: ${current}")}
 	// coo is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
 }
 
 // graphics:
-fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, ctx gg.Context){
-	match tree.compo{
-		Elements{
+fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, parent Triatree_Ensemble, ctx gg.Context) {
+	match tree.compo {
+		Elements {
 			pos := pos_center + coo_tria_to_cart(tree.coo, rota)
 			mut angle := rota
-			if check_reverse(tree.coo){
+			if check_reverse(tree.coo) {
 				angle += math.pi
 			}
-			size := f32(math.pow(2, tree.dimension) )
+			size := f32(math.pow(2, tree.dimension))
 			ctx.draw_polygon_filled(pos.x, pos.y, size, 3, angle, elements_caras[tree.compo].color)
 		}
-		Childs{
-			tree.compo.mid   .draw(pos_center, rota, ctx)
-			tree.compo.up    .draw(pos_center, rota, ctx)
-			tree.compo.left  .draw(pos_center, rota, ctx)
-			tree.compo.right .draw(pos_center, rota, ctx)
+		Childs {
+			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, parent, ctx)
+			parent.liste_tree[tree.compo.up].draw(pos_center, rota, parent, ctx)
+			parent.liste_tree[tree.compo.left].draw(pos_center, rota, parent, ctx)
+			parent.liste_tree[tree.compo.right].draw(pos_center, rota, parent, ctx)
 		}
 	}
-
 }
- 
+
 // find
-fn (tree Triatree) go_to(coo []int) &Triatree {
+fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) &Triatree {
 	if coo == tree.coo {
 		return &tree
 	}
 	match tree.compo {
 		Childs {
 			if coo[0] == 0 {
-				return tree.compo.mid.go_to(coo[1..])
+				return parent.liste_tree[tree.compo.mid].go_to(coo[1..], parent)
 			} else if coo[0] == 1 {
-				return tree.compo.mid.go_to(coo[1..])
+				return parent.liste_tree[tree.compo.up].go_to(coo[1..], parent)
 			} else if coo[0] == 2 {
-				return tree.compo.mid.go_to(coo[1..])
+				return parent.liste_tree[tree.compo.left].go_to(coo[1..], parent)
 			} else if coo[0] == 3 {
-				return tree.compo.mid.go_to(coo[1..])
+				return parent.liste_tree[tree.compo.right].go_to(coo[1..], parent)
 			}
 		}
 		else {}
@@ -442,7 +433,8 @@ fn gravity(coo []int, center int) []int {
 }
 
 // divide & merge:
-fn (mut tree Triatree) divide() {
+fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
+	panic('To complete')
 	if tree.dimension > 0 {
 		match tree.compo {
 			Elements {
@@ -454,28 +446,28 @@ fn (mut tree Triatree) divide() {
 				pos_2 << [2]
 				mut pos_3 := tree.coo.clone()
 				pos_3 << [3]
-				tree.compo = Childs{
-					mid:   Triatree{
-						compo:     tree.compo
-						coo:       pos_0
-						dimension: (tree.dimension - 1)
-					}
-					up:    Triatree{
-						compo:     tree.compo
-						coo:       pos_1
-						dimension: (tree.dimension - 1)
-					}
-					left:  Triatree{
-						compo:     tree.compo
-						coo:       pos_2
-						dimension: (tree.dimension - 1)
-					}
-					right: Triatree{
-						compo:     tree.compo
-						coo:       pos_3
-						dimension: (tree.dimension - 1)
-					}
-				}
+				// tree.compo = Childs{
+				// 	mid:   Triatree{
+				// 		compo:     tree.compo
+				// 		coo:       pos_0
+				// 		dimension: (tree.dimension - 1)
+				// 	}
+				// 	up:    Triatree{
+				// 		compo:     tree.compo
+				// 		coo:       pos_1
+				// 		dimension: (tree.dimension - 1)
+				// 	}
+				// 	left:  Triatree{
+				// 		compo:     tree.compo
+				// 		coo:       pos_2
+				// 		dimension: (tree.dimension - 1)
+				// 	}
+				// 	right: Triatree{
+				// 		compo:     tree.compo
+				// 		coo:       pos_3
+				// 		dimension: (tree.dimension - 1)
+				// 	}
+				// }
 			}
 			else {}
 		}

@@ -2,23 +2,40 @@ module main
 
 import math
 import math.vec { Vec2, vec2 }
+import gg
 import rand
 
 const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
 
+enum Elements {
+	// element is a key of the elements_caras map
+	wood
+}
+
+const elements_caras = {
+	Elements.wood: Cara{color: gg.Color{125, 125, 125, 255}}
+}
+
+
+struct Cara {
+	// quantitées intensives
+	color	gg.Color	
+}
+
 // to delete:
 const dimensions_max = 3
-
 //
-type Self = Cara | Childs
+
+type Self = Elements | Childs
 
 struct Triatree {
 mut:
 	compo Self
 
-	coo       []int
-	dimension int
+	id			int
+	dimension	int
+	coo			[]int
 	// entre dimensions_max et 0
 }
 
@@ -29,9 +46,6 @@ struct Childs {
 	right Triatree
 }
 
-struct Cara {
-	// quantitées intensives
-}
 
 // COO TRIA TO CART:
 fn coo_tria_to_cart(coo []int, rota f32) Vec2[f32] {
@@ -394,7 +408,7 @@ fn gravity(coo []int, center int) []int {
 fn (mut tree Triatree) divide() {
 	if tree.dimension > 0 {
 		match tree.compo {
-			Cara {
+			Elements {
 				mut pos_0 := tree.coo.clone()
 				pos_0 << [0]
 				mut pos_1 := tree.coo.clone()

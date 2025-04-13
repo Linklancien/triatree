@@ -23,20 +23,35 @@ struct Cara {
 	color	gg.Color	
 }
 
-// to delete:
-const dimensions_max = 3
-//
-
 type Self = Elements | Childs
+
+struct Triatree_Ensemble {
+	mut:
+	next_id	int
+	liste_tree	[]triatree
+}
+
+fn (ensemble Triatree_Ensemble) find_index_of_id(id int) int{
+	for index in 0..ensemble.liste_tree.len{
+		if ensemble.liste_tree[index].id == id{
+			return index
+		}
+	}
+	panic("Not found")
+	return -1
+}
+
+struct Hexa_world {
+	world	[]Triatree_Ensemble
+}
 
 struct Triatree {
 mut:
 	compo Self
 
 	id			int
-	dimension	int
+	dimension	int		// entre dimensions_max et 0
 	coo			[]int
-	// entre dimensions_max et 0
 }
 
 struct Childs {
@@ -76,7 +91,7 @@ fn hexa_world_coo_tria_to_cart(coo []int, current int) Vec2[f32] {
 }
 
 // return the coo of the 3 corners of a triangle in order [1, 2, 3]
-fn coo_cart_corners(coo []int, rota f32) (Vec2[f32], Vec2[f32], Vec2[f32]) {
+fn coo_cart_corners(coo []int, rota f32, dimensions_max int) (Vec2[f32], Vec2[f32], Vec2[f32]) {
 	center_pos := coo_tria_to_cart(coo, rota)
 	mut angle := rota
 	for id in 0 .. coo.len {
@@ -288,6 +303,28 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 	return []int{len: 3, init: current}, directs_neighbors
 }
 
+// graphics:
+fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, ctx gg.Context){
+	match tree.compo{
+		Elements{
+			pos := pos_center + coo_tria_to_cart(tree.coo, rota)
+			mut angle := rota
+			if check_reverse(tree.coo){
+				angle += math.pi
+			}
+			size := f32(math.pow(2, tree.dimension) )
+			ctx.draw_polygon_filled(pos.x, pos.y, size, 3, angle, elements_caras[tree.compo].color)
+		}
+		Childs{
+			tree.compo.mid   .draw(pos_center, rota, ctx)
+			tree.compo.up    .draw(pos_center, rota, ctx)
+			tree.compo.left  .draw(pos_center, rota, ctx)
+			tree.compo.right .draw(pos_center, rota, ctx)
+		}
+	}
+
+}
+ 
 // find
 fn (tree Triatree) go_to(coo []int) &Triatree {
 	if coo == tree.coo {

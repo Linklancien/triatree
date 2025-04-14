@@ -42,6 +42,7 @@ mut:
 
 	id        int
 	dimension int
+
 	// entre dimensions_max et 0
 	coo []int
 }
@@ -104,7 +105,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 		return []int{}
 	}
 
-	abs_x := math.pow(2, dimension)
+	abs_x := math.pow(2, dimension+1)
 
 	// using math:
 	// check if the position is inside the triangle
@@ -117,7 +118,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// check in which child of the triangle is the position
 	mut coo := 0
 	ratio_in := pos.y / math.sqrt(3) - abs_x / 6
-	if pos.y <= -abs_x / (4 * math.sqrt(3)) {
+	if pos.y < -abs_x / (4 * math.sqrt(3)) {
 		coo = 1
 	} else if pos.x < ratio_in {
 		coo = 3
@@ -315,6 +316,7 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, parent Triatree_Ensemble
 			size := f32(math.pow(2, tree.dimension) * 2 / math.sqrt(3)) - 1
 			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
 				elements_caras[tree.compo].color)
+
 			// ctx.draw_circle_empty(pos.x, -pos.y, size, gg.Color{255, 0, 0, 255})
 		}
 		Childs {
@@ -484,6 +486,7 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 					dimension: tree.dimension
 					coo:       tree.coo.clone()
 				}
+
 				// tree.compo = Childs{
 				// 	mid:   ids[0]
 				// 	up:    ids[1]

@@ -117,7 +117,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// check in which child of the triangle is the position
 	mut coo := 0
 	ratio_in := pos.y / math.sqrt(3) - abs_x / 6
-	if pos.y <= -abs_x / (2 * math.sqrt(3)) {
+	if pos.y <= -abs_x / (4 * math.sqrt(3)) {
 		coo = 1
 	} else if pos.x < ratio_in {
 		coo = 3
@@ -129,7 +129,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 
 	// compute the position of the child compared to the center of the current triangle
 	mut actual_pos := center
-	dist := f32(math.pow(2, dimension) / (4 * math.sqrt(3)))
+	dist := f32(abs_x / (2 * math.sqrt(3)))
 	if coo == 1 {
 		actual_pos += vec2[f32](dist, 0).rotate_around_ccw(center, -math.pi / 2)
 	} else if coo == 2 {

@@ -31,7 +31,7 @@ fn main() {
 	app.tria_ensemble.liste_tree << Triatree{
 		compo:     Elements.wood
 		id:        app.tria_ensemble.liste_tree.len
-		dimension: 6
+		dimension: 8
 		coo:       []
 	}
 	app.tria_ensemble.liste_tree[0].divide(mut app.tria_ensemble)

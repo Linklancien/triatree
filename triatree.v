@@ -59,7 +59,7 @@ fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
 	mut angle := rota
 	for id in 0 .. coo.len {
 		n := dimensions_max - 1 - id
-		dist := f32(math.pow(2, n) / math.sqrt(3))
+		dist := f32(math.pow(2, n - 1) / math.sqrt(3))
 		if coo[id] == 0 {
 			angle += math.pi
 		} else if coo[id] == 1 {
@@ -313,7 +313,8 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, parent Triatree_Ensemble
 				angle += math.pi
 			}
 			size := f32(math.pow(2, tree.dimension))
-			ctx.draw_polygon_filled(pos.x, pos.y, size, 3, f32(math.degrees(angle)), elements_caras[tree.compo].color)
+			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
+				elements_caras[tree.compo].color)
 		}
 		Childs {
 			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, parent, ctx)

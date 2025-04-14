@@ -290,7 +290,7 @@ fn test_gravity() {
 	}
 	println('success')
 
-	println('Passed') 
+	println('Passed')
 	println('--------------------')
 }
 
@@ -321,7 +321,7 @@ fn test_check_reverse() {
 
 fn test_remove_from_base() {
 	println('--------------------')
-	println('test_private():')
+	println('test_remove_from_base():')
 
 	print('test 1 usefull: ')
 	base := [0, 1, 2, 3]

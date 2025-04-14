@@ -59,7 +59,7 @@ fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
 	mut position := vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0 .. coo.len {
-		dim := dimensions_max - id
+		dim := dimensions_max - id - 1
 		dist := f32(math.pow(2, dim) / math.sqrt(3))
 		if coo[id] == 0 {
 			angle += math.pi
@@ -105,7 +105,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 		return []int{}
 	}
 
-	abs_x := math.pow(2, dimension+1)
+	abs_x := math.pow(2, dimension)
 
 	// using math:
 	// check if the position is inside the triangle
@@ -120,10 +120,10 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	ratio_in := pos.y / math.sqrt(3) - abs_x / 6
 	if pos.y < -abs_x / (4 * math.sqrt(3)) {
 		coo = 1
-	} else if pos.x < ratio_in {
-		coo = 3
 	} else if -pos.x < ratio_in {
 		coo = 2
+	} else if pos.x < ratio_in {
+		coo = 3
 	} else {
 		coo = 0
 	}
@@ -313,7 +313,7 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, parent Triatree_Ensemble
 			if is_reverse {
 				angle += math.pi
 			}
-			size := f32(math.pow(2, tree.dimension) * 2 / math.sqrt(3)) - 1
+			size := f32(math.pow(2, tree.dimension) / math.sqrt(3)) - 1
 			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
 				elements_caras[tree.compo].color)
 

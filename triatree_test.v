@@ -10,17 +10,17 @@ fn test_coos() {
 			for z in 0 .. 4 {
 				coo := [x, y, z]
 				pos := coo_tria_to_cart(coo, 0, coo.len)
-				new_coo := coo_cart_to_tria(pos, coo.len - 1)
+				new_coo := coo_cart_to_tria(pos, coo.len)
 				new_pos := coo_tria_to_cart(new_coo, 0, coo.len)
 
-				assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 				assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
+				assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 				assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
 			}
 		}
 	}
 	println('success')
-	print('test 2 bijection:')
+	print('test 2 hugest bijection:')
 	for x in 0 .. 4 {
 		for y in 0 .. 4 {
 			for z in 0 .. 4 {
@@ -29,7 +29,7 @@ fn test_coos() {
 						for t in 0 .. 4 {
 							coo := [x, y, z, r, s, t]
 							pos := coo_tria_to_cart(coo, 0, coo.len)
-							new_coo := coo_cart_to_tria(pos, coo.len - 1)
+							new_coo := coo_cart_to_tria(pos, coo.len)
 							new_pos := coo_tria_to_cart(new_coo, 0, coo.len)
 
 							assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '

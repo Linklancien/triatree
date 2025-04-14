@@ -59,7 +59,7 @@ fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
 	mut angle := rota
 	for id in 0 .. coo.len {
 		n := dimensions_max - 1 - id
-		dist := f32(math.pow(2, n - 1) / math.sqrt(3))
+		dist := f32(math.pow(2, n) / math.sqrt(3))
 		if coo[id] == 0 {
 			angle += math.pi
 		} else if coo[id] == 1 {
@@ -75,7 +75,7 @@ fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
 
 fn hexa_world_coo_tria_to_cart(coo []int, current int, dimensions_max int) Vec2[f32] {
 	rota := f32(current - 1) * math.pi / 3
-	dist := f32(math.pow(2, coo.len) / math.sqrt(3))
+	dist := f32(math.pow(2, dimensions_max) / math.sqrt(3))
 	coo_in_triangle := (coo_tria_to_cart(coo, 0, dimensions_max) + vec2[f32](0, dist)).rotate_around_ccw(center,
 		rota)
 	return coo_in_triangle
@@ -100,7 +100,7 @@ fn coo_cart_corners(coo []int, rota f32, dimensions_max int) (Vec2[f32], Vec2[f3
 // COO CART TO TRIA:
 fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// at the start the child 1 of the hugest triangle is pointing downward
-	if dimension == -1 {
+	if dimension == 0 {
 		return []int{}
 	}
 
@@ -171,7 +171,7 @@ fn hexa_world_coo_cart_to_tria(pos Vec2[f32], dimension_precision int) ([]int, i
 	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, dimension_precision) / math.sqrt(3))
 	position := pos.rotate_around_cw(center, rota) - vec2[f32](0, dist)
-	coo := coo_cart_to_tria(position, dimension_precision - 1)
+	coo := coo_cart_to_tria(position, dimension_precision)
 
 	return coo, current
 }

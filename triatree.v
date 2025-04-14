@@ -58,8 +58,8 @@ fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
 	mut position := vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0 .. coo.len {
-		n := dimensions_max - 1 - id
-		dist := f32(math.pow(2, n) / math.sqrt(3))
+		dim := dimensions_max - id
+		dist := f32(math.pow(2, dim) / math.sqrt(3))
 		if coo[id] == 0 {
 			angle += math.pi
 		} else if coo[id] == 1 {
@@ -109,7 +109,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// using math:
 	// check if the position is inside the triangle
 	ratio_out := pos.y / math.sqrt(3) + abs_x / 3
-	if pos.y >= abs_x / (2 * math.sqrt(3)) || pos.x > ratio_out || -pos.x > ratio_out {
+	if pos.y > abs_x / (2 * math.sqrt(3)) || pos.x > ratio_out || -pos.x > ratio_out {
 		// panic('Not in trianlge dim: $dimension, \n pos: $pos \n ${pos.y >= abs_x /(2* math.sqrt(3))} \n ${pos.x > ratio_out} \n ${-pos.x > ratio_out}')
 		return []int{}
 	}
@@ -117,7 +117,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// check in which child of the triangle is the position
 	mut coo := 0
 	ratio_in := pos.y / math.sqrt(3) - abs_x / 6
-	if pos.y <= -abs_x / (4 * math.sqrt(3)) {
+	if pos.y <= -abs_x / (2 * math.sqrt(3)) {
 		coo = 1
 	} else if pos.x < ratio_in {
 		coo = 3
@@ -129,7 +129,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 
 	// compute the position of the child compared to the center of the current triangle
 	mut actual_pos := center
-	dist := f32(math.pow(2, dimension - 1) / math.sqrt(3))
+	dist := f32(math.pow(2, dimension) / (4 * math.sqrt(3)))
 	if coo == 1 {
 		actual_pos += vec2[f32](dist, 0).rotate_around_ccw(center, -math.pi / 2)
 	} else if coo == 2 {
@@ -312,9 +312,10 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, parent Triatree_Ensemble
 			if is_reverse {
 				angle += math.pi
 			}
-			size := f32(math.pow(2, tree.dimension))
+			size := f32(math.pow(2, tree.dimension) * 2 / math.sqrt(3)) - 1
 			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
 				elements_caras[tree.compo].color)
+			// ctx.draw_circle_empty(pos.x, -pos.y, size, gg.Color{255, 0, 0, 255})
 		}
 		Childs {
 			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, parent, ctx)

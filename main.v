@@ -35,6 +35,8 @@ fn main() {
 		coo:       []
 	}
 	app.tria_ensemble.liste_tree[0].divide(mut app.tria_ensemble)
+	app.tria_ensemble.liste_tree[3].divide(mut app.tria_ensemble)
+	app.tria_ensemble.liste_tree[2].divide(mut app.tria_ensemble)
 
 	app.ctx.run()
 }

@@ -54,12 +54,12 @@ struct Childs {
 }
 
 // COO TRIA TO CART:
-fn coo_tria_to_cart(coo []int, rota f32) Vec2[f32] {
+fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
 	mut position := vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0 .. coo.len {
-		n := coo.len - 1 - id
-		dist := f32(math.pow(2, n - 1) / math.sqrt(3))
+		n := dimensions_max - 1 - id
+		dist := f32(math.pow(2, n) / math.sqrt(3))
 		if coo[id] == 0 {
 			angle += math.pi
 		} else if coo[id] == 1 {
@@ -73,17 +73,17 @@ fn coo_tria_to_cart(coo []int, rota f32) Vec2[f32] {
 	return position
 }
 
-fn hexa_world_coo_tria_to_cart(coo []int, current int) Vec2[f32] {
+fn hexa_world_coo_tria_to_cart(coo []int, current int, dimensions_max int) Vec2[f32] {
 	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, coo.len) / math.sqrt(3))
-	coo_in_triangle := (coo_tria_to_cart(coo, 0) + vec2[f32](0, dist)).rotate_around_ccw(center,
+	coo_in_triangle := (coo_tria_to_cart(coo, 0, dimensions_max) + vec2[f32](0, dist)).rotate_around_ccw(center,
 		rota)
 	return coo_in_triangle
 }
 
 // return the coo of the 3 corners of a triangle in order [1, 2, 3]
 fn coo_cart_corners(coo []int, rota f32, dimensions_max int) (Vec2[f32], Vec2[f32], Vec2[f32]) {
-	center_pos := coo_tria_to_cart(coo, rota)
+	center_pos := coo_tria_to_cart(coo, rota, dimensions_max)
 	mut angle := rota
 	for id in 0 .. coo.len {
 		if coo[id] == 0 {
@@ -299,13 +299,21 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, parent Triatree_Ensemble, ctx gg.Context) {
 	match tree.compo {
 		Elements {
-			pos := pos_center + coo_tria_to_cart(tree.coo, rota)
-			mut angle := rota
-			if check_reverse(tree.coo) {
+			pos := pos_center + coo_tria_to_cart(tree.coo, rota, tree.dimension + tree.coo.len)
+			mut angle := rota - math.pi / 6
+
+			mut is_reverse := false
+			for elem in tree.coo {
+				if elem == 0 {
+					is_reverse = !is_reverse
+				}
+			}
+
+			if is_reverse {
 				angle += math.pi
 			}
 			size := f32(math.pow(2, tree.dimension))
-			ctx.draw_polygon_filled(pos.x, pos.y, size, 3, angle, elements_caras[tree.compo].color)
+			ctx.draw_polygon_filled(pos.x, pos.y, size, 3, f32(math.degrees(angle)), elements_caras[tree.compo].color)
 		}
 		Childs {
 			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, parent, ctx)
@@ -345,6 +353,10 @@ fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) &Triatree {
 // take a position, and a corner towards which is applied the gravity and return the next likely position
 fn gravity(coo []int, center int) []int {
 	n := coo.len
+
+	if coo == [] {
+		return []
+	}
 
 	is_reverse := check_reverse(coo)
 
@@ -434,39 +446,47 @@ fn gravity(coo []int, center int) []int {
 
 // divide & merge:
 fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
-	panic('To complete')
 	if tree.dimension > 0 {
 		match tree.compo {
 			Elements {
-				mut pos_0 := tree.coo.clone()
-				pos_0 << [0]
-				mut pos_1 := tree.coo.clone()
-				pos_1 << [1]
-				mut pos_2 := tree.coo.clone()
-				pos_2 << [2]
-				mut pos_3 := tree.coo.clone()
-				pos_3 << [3]
+				mut ids := []int{}
+				for new in 0 .. 4 {
+					mut next_coo := tree.coo.clone()
+					next_coo << [new]
+
+					mut id := -1
+					if parent.free_index.len != 0 {
+						id = parent.free_index.pop()
+					} else {
+						id = parent.liste_tree.len
+					}
+					ids << [id]
+
+					parent.liste_tree << [
+						Triatree{
+							compo:     tree.compo
+							id:        id
+							dimension: (tree.dimension - 1)
+							coo:       next_coo
+						},
+					]
+				}
+				parent.liste_tree[tree.id] = Triatree{
+					compo:     Childs{
+						mid:   ids[0]
+						up:    ids[1]
+						left:  ids[2]
+						right: ids[3]
+					}
+					id:        tree.id
+					dimension: tree.dimension
+					coo:       tree.coo.clone()
+				}
 				// tree.compo = Childs{
-				// 	mid:   Triatree{
-				// 		compo:     tree.compo
-				// 		coo:       pos_0
-				// 		dimension: (tree.dimension - 1)
-				// 	}
-				// 	up:    Triatree{
-				// 		compo:     tree.compo
-				// 		coo:       pos_1
-				// 		dimension: (tree.dimension - 1)
-				// 	}
-				// 	left:  Triatree{
-				// 		compo:     tree.compo
-				// 		coo:       pos_2
-				// 		dimension: (tree.dimension - 1)
-				// 	}
-				// 	right: Triatree{
-				// 		compo:     tree.compo
-				// 		coo:       pos_3
-				// 		dimension: (tree.dimension - 1)
-				// 	}
+				// 	mid:   ids[0]
+				// 	up:    ids[1]
+				// 	left:  ids[2]
+				// 	right: ids[3]
 				// }
 			}
 			else {}

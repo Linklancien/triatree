@@ -14,46 +14,54 @@ enum Elements {
 }
 
 const elements_caras = {
-	Elements.wood: Cara{color: gg.Color{125, 125, 125, 255}}
+	Elements.wood: Cara{
+		color: gg.Color{125, 125, 125, 255}
+	}
 }
-
 
 struct Cara {
 	// quantitées intensives
-	color	gg.Color	
+	color gg.Color
 }
 
-// to delete:
-const dimensions_max = 3
-//
-
 type Self = Elements | Childs
+
+struct Triatree_Ensemble {
+mut:
+	free_index []int
+	liste_tree []Triatree
+}
+
+struct Hexa_world {
+mut:
+	world []Triatree_Ensemble
+}
 
 struct Triatree {
 mut:
 	compo Self
 
-	id			int
-	dimension	int
-	coo			[]int
+	id        int
+	dimension int
+
 	// entre dimensions_max et 0
+	coo []int
 }
 
 struct Childs {
-	mid   Triatree
-	up    Triatree
-	left  Triatree
-	right Triatree
+	mid   int
+	up    int
+	left  int
+	right int
 }
 
-
 // COO TRIA TO CART:
-fn coo_tria_to_cart(coo []int, rota f32) Vec2[f32] {
+fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
 	mut position := vec2[f32](0.0, 0.0)
 	mut angle := rota
 	for id in 0 .. coo.len {
-		n := coo.len - 1 - id
-		dist := f32(math.pow(2, n - 1) / math.sqrt(3))
+		dim := dimensions_max - id - 1
+		dist := f32(math.pow(2, dim) / math.sqrt(3))
 		if coo[id] == 0 {
 			angle += math.pi
 		} else if coo[id] == 1 {
@@ -67,17 +75,17 @@ fn coo_tria_to_cart(coo []int, rota f32) Vec2[f32] {
 	return position
 }
 
-fn hexa_world_coo_tria_to_cart(coo []int, current int) Vec2[f32] {
+fn hexa_world_coo_tria_to_cart(coo []int, current int, dimensions_max int) Vec2[f32] {
 	rota := f32(current - 1) * math.pi / 3
-	dist := f32(math.pow(2, coo.len) / math.sqrt(3))
-	coo_in_triangle := (coo_tria_to_cart(coo, 0) + vec2[f32](0, dist)).rotate_around_ccw(center,
+	dist := f32(math.pow(2, dimensions_max) / math.sqrt(3))
+	coo_in_triangle := (coo_tria_to_cart(coo, 0, dimensions_max) + vec2[f32](0, dist)).rotate_around_ccw(center,
 		rota)
 	return coo_in_triangle
 }
 
 // return the coo of the 3 corners of a triangle in order [1, 2, 3]
-fn coo_cart_corners(coo []int, rota f32) (Vec2[f32], Vec2[f32], Vec2[f32]) {
-	center_pos := coo_tria_to_cart(coo, rota)
+fn coo_cart_corners(coo []int, rota f32, dimensions_max int) (Vec2[f32], Vec2[f32], Vec2[f32]) {
+	center_pos := coo_tria_to_cart(coo, rota, dimensions_max)
 	mut angle := rota
 	for id in 0 .. coo.len {
 		if coo[id] == 0 {
@@ -94,7 +102,7 @@ fn coo_cart_corners(coo []int, rota f32) (Vec2[f32], Vec2[f32], Vec2[f32]) {
 // COO CART TO TRIA:
 fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// at the start the child 1 of the hugest triangle is pointing downward
-	if dimension == -1 {
+	if dimension == 0 {
 		return []int{}
 	}
 
@@ -103,7 +111,7 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// using math:
 	// check if the position is inside the triangle
 	ratio_out := pos.y / math.sqrt(3) + abs_x / 3
-	if pos.y >= abs_x / (2 * math.sqrt(3)) || pos.x > ratio_out || -pos.x > ratio_out {
+	if pos.y > abs_x / (2 * math.sqrt(3)) || pos.x > ratio_out || -pos.x > ratio_out {
 		// panic('Not in trianlge dim: $dimension, \n pos: $pos \n ${pos.y >= abs_x /(2* math.sqrt(3))} \n ${pos.x > ratio_out} \n ${-pos.x > ratio_out}')
 		return []int{}
 	}
@@ -111,19 +119,19 @@ fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// check in which child of the triangle is the position
 	mut coo := 0
 	ratio_in := pos.y / math.sqrt(3) - abs_x / 6
-	if pos.y <= -abs_x / (4 * math.sqrt(3)) {
+	if pos.y < -abs_x / (4 * math.sqrt(3)) {
 		coo = 1
-	} else if pos.x < ratio_in {
-		coo = 3
 	} else if -pos.x < ratio_in {
 		coo = 2
+	} else if pos.x < ratio_in {
+		coo = 3
 	} else {
 		coo = 0
 	}
 
 	// compute the position of the child compared to the center of the current triangle
 	mut actual_pos := center
-	dist := f32(math.pow(2, dimension - 1) / math.sqrt(3))
+	dist := f32(abs_x / (2 * math.sqrt(3)))
 	if coo == 1 {
 		actual_pos += vec2[f32](dist, 0).rotate_around_ccw(center, -math.pi / 2)
 	} else if coo == 2 {
@@ -165,7 +173,7 @@ fn hexa_world_coo_cart_to_tria(pos Vec2[f32], dimension_precision int) ([]int, i
 	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, dimension_precision) / math.sqrt(3))
 	position := pos.rotate_around_cw(center, rota) - vec2[f32](0, dist)
-	coo := coo_cart_to_tria(position, dimension_precision - 1)
+	coo := coo_cart_to_tria(position, dimension_precision)
 
 	return coo, current
 }
@@ -283,26 +291,83 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 			return near, directs_neighbors
 		}
 	}
+
 	// else{panic("A 0 without 3 neigbors in it's base ??? coo: ${coo} current: ${current}")}
 	// coo is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
 }
 
+// graphics:
+fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, parent Triatree_Ensemble, ctx gg.Context) {
+	match tree.compo {
+		Elements {
+			pos := pos_center + (coo_tria_to_cart(tree.coo, rota, tree.dimension +
+				tree.coo.len)).mul_scalar(zomm_factor)
+			mut angle := -rota - math.pi / 6
+
+			mut is_reverse := false
+			for elem in tree.coo {
+				if elem == 0 {
+					is_reverse = !is_reverse
+				}
+			}
+
+			if is_reverse {
+				angle += math.pi
+			}
+			size := f32(zomm_factor * math.pow(2, tree.dimension) / math.sqrt(3)) - 1
+			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
+				elements_caras[tree.compo].color)
+		}
+		Childs {
+			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zomm_factor, parent,
+				ctx)
+			parent.liste_tree[tree.compo.up].draw(pos_center, rota, zomm_factor, parent,
+				ctx)
+			parent.liste_tree[tree.compo.left].draw(pos_center, rota, zomm_factor, parent,
+				ctx)
+			parent.liste_tree[tree.compo.right].draw(pos_center, rota, zomm_factor, parent,
+				ctx)
+		}
+	}
+}
+
+fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, ctx gg.Context) {
+	if tria_ensemble.liste_tree.len != 0 {
+		tria_ensemble.liste_tree[0].draw(pos_center, rota, zomm_factor, tria_ensemble,
+			ctx)
+	}
+}
+
+fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, current int, ctx gg.Context) {
+	for i in 0 .. 6 {
+		if hexa_world.world[i].liste_tree.len != 0 {
+			angle := rota + (i - f32(current))* math.pi / 3
+
+			dim := hexa_world.world[i].liste_tree[0].dimension
+			dist := f32(math.pow(2, dim) / math.sqrt(3))
+			pos := pos_center + (vec2[f32](0, dist)).rotate_around_ccw(center, angle)
+
+			hexa_world.world[i].draw(pos, angle, zomm_factor, ctx)
+		}
+	}
+}
+
 // find
-fn (tree Triatree) go_to(coo []int) &Triatree {
+fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) &Triatree {
 	if coo == tree.coo {
 		return &tree
 	}
 	match tree.compo {
 		Childs {
 			if coo[0] == 0 {
-				return tree.compo.mid.go_to(coo[1..])
+				return parent.liste_tree[tree.compo.mid].go_to(coo[1..], parent)
 			} else if coo[0] == 1 {
-				return tree.compo.mid.go_to(coo[1..])
+				return parent.liste_tree[tree.compo.up].go_to(coo[1..], parent)
 			} else if coo[0] == 2 {
-				return tree.compo.mid.go_to(coo[1..])
+				return parent.liste_tree[tree.compo.left].go_to(coo[1..], parent)
 			} else if coo[0] == 3 {
-				return tree.compo.mid.go_to(coo[1..])
+				return parent.liste_tree[tree.compo.right].go_to(coo[1..], parent)
 			}
 		}
 		else {}
@@ -317,6 +382,10 @@ fn (tree Triatree) go_to(coo []int) &Triatree {
 // take a position, and a corner towards which is applied the gravity and return the next likely position
 fn gravity(coo []int, center int) []int {
 	n := coo.len
+
+	if coo == [] {
+		return []
+	}
 
 	is_reverse := check_reverse(coo)
 
@@ -405,43 +474,63 @@ fn gravity(coo []int, center int) []int {
 }
 
 // divide & merge:
-fn (mut tree Triatree) divide() {
+fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 	if tree.dimension > 0 {
 		match tree.compo {
 			Elements {
-				mut pos_0 := tree.coo.clone()
-				pos_0 << [0]
-				mut pos_1 := tree.coo.clone()
-				pos_1 << [1]
-				mut pos_2 := tree.coo.clone()
-				pos_2 << [2]
-				mut pos_3 := tree.coo.clone()
-				pos_3 << [3]
-				tree.compo = Childs{
-					mid:   Triatree{
-						compo:     tree.compo
-						coo:       pos_0
-						dimension: (tree.dimension - 1)
+				mut ids := []int{}
+				for new in 0 .. 4 {
+					mut next_coo := tree.coo.clone()
+					next_coo << [new]
+
+					mut id := -1
+					if parent.free_index.len != 0 {
+						id = parent.free_index.pop()
+					} else {
+						id = parent.liste_tree.len
 					}
-					up:    Triatree{
-						compo:     tree.compo
-						coo:       pos_1
-						dimension: (tree.dimension - 1)
-					}
-					left:  Triatree{
-						compo:     tree.compo
-						coo:       pos_2
-						dimension: (tree.dimension - 1)
-					}
-					right: Triatree{
-						compo:     tree.compo
-						coo:       pos_3
-						dimension: (tree.dimension - 1)
-					}
+					ids << [id]
+
+					parent.liste_tree << [
+						Triatree{
+							compo:     tree.compo
+							id:        id
+							dimension: (tree.dimension - 1)
+							coo:       next_coo
+						},
+					]
 				}
+				parent.liste_tree[tree.id] = Triatree{
+					compo:     Childs{
+						mid:   ids[0]
+						up:    ids[1]
+						left:  ids[2]
+						right: ids[3]
+					}
+					id:        tree.id
+					dimension: tree.dimension
+					coo:       tree.coo.clone()
+				}
+
+				// tree.compo = Childs{
+				// 	mid:   ids[0]
+				// 	up:    ids[1]
+				// 	left:  ids[2]
+				// 	right: ids[3]
+				// }
 			}
 			else {}
 		}
+	}
+}
+
+fn (mut tria_ensemble Triatree_Ensemble) divide(){
+	tria_ensemble.liste_tree[0].divide(mut tria_ensemble)
+}
+
+fn (mut hexa_world Hexa_world) divide(){
+	for mut tria_ensemble in hexa_world.world{
+		tria_ensemble.divide()
 	}
 }
 

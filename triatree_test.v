@@ -9,18 +9,18 @@ fn test_coos() {
 		for y in 0 .. 4 {
 			for z in 0 .. 4 {
 				coo := [x, y, z]
-				pos := coo_tria_to_cart(coo, 0)
-				new_coo := coo_cart_to_tria(pos, coo.len - 1)
-				new_pos := coo_tria_to_cart(new_coo, 0)
+				pos := coo_tria_to_cart(coo, 0, coo.len)
+				new_coo := coo_cart_to_tria(pos, coo.len)
+				new_pos := coo_tria_to_cart(new_coo, 0, coo.len)
 
-				assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 				assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
+				assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 				assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
 			}
 		}
 	}
 	println('success')
-	print('test 2 bijection:')
+	print('test 2 hugest bijection:')
 	for x in 0 .. 4 {
 		for y in 0 .. 4 {
 			for z in 0 .. 4 {
@@ -28,12 +28,12 @@ fn test_coos() {
 					for s in 0 .. 4 {
 						for t in 0 .. 4 {
 							coo := [x, y, z, r, s, t]
-							pos := coo_tria_to_cart(coo, 0)
-							new_coo := coo_cart_to_tria(pos, coo.len - 1)
-							new_pos := coo_tria_to_cart(new_coo, 0)
+							pos := coo_tria_to_cart(coo, 0, coo.len)
+							new_coo := coo_cart_to_tria(pos, coo.len)
+							new_pos := coo_tria_to_cart(new_coo, 0, coo.len)
 
-							assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 							assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
+							assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 							assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
 						}
 					}
@@ -57,12 +57,12 @@ fn test_hexa_world_coos() {
 			for y in 0 .. 4 {
 				for z in 0 .. 4 {
 					coo := [x, y, z]
-					pos := hexa_world_coo_tria_to_cart(coo, c)
+					pos := hexa_world_coo_tria_to_cart(coo, c, coo.len)
 					new_coo, new_c := hexa_world_coo_cart_to_tria(pos, coo.len)
-					new_pos := hexa_world_coo_tria_to_cart(new_coo, new_c)
+					new_pos := hexa_world_coo_tria_to_cart(new_coo, new_c, coo.len)
 
-					assert pos == new_pos, 'assertion failed: \n coo ${coo}, c ${c} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo}, new_c ${new_c} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 					assert coo == new_coo, 'assertion failed: \n coo ${coo}, c ${c} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo}, new_c ${new_c} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
+					assert pos == new_pos, 'assertion failed: \n coo ${coo}, c ${c} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo}, new_c ${new_c} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 					assert pos.magnitude() == new_pos.magnitude(), 'assertion failed: \n coo ${coo}, c ${c} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo}, new_c ${new_c} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 					assert c == new_c, 'assertion failed c: ${c}, new_c: ${new_c}'
 				}
@@ -321,7 +321,7 @@ fn test_check_reverse() {
 
 fn test_remove_from_base() {
 	println('--------------------')
-	println('test_private():')
+	println('test_remove_from_base():')
 
 	print('test 1 usefull: ')
 	base := [0, 1, 2, 3]

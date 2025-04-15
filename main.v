@@ -37,7 +37,6 @@ fn main() {
 	// app.tria_ensemble.liste_tree[0].divide(mut app.tria_ensemble)
 	// app.tria_ensemble.liste_tree[3].divide(mut app.tria_ensemble)
 	// app.tria_ensemble.liste_tree[2].divide(mut app.tria_ensemble)
-
 	app.carte = Hexa_world{
 		world: []Triatree_Ensemble{len: 6, init: Triatree_Ensemble{
 			liste_tree: []Triatree{len: 1, init: Triatree{

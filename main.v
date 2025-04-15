@@ -1,5 +1,6 @@
 module main
 
+import math
 import math.vec { vec2 }
 import gg
 
@@ -45,8 +46,8 @@ fn on_init(mut app App) {}
 
 fn on_frame(mut app App) {
 	app.ctx.begin()
-	position := vec2[f32](f32(400), f32(-400))
-	app.tria_ensemble.liste_tree[0].draw(position, 0, app.tria_ensemble, app.ctx)
+	screen_center := vec2[f32](f32(app.ctx.width/2), f32(-app.ctx.height/2))
+	app.tria_ensemble.draw(screen_center, 0, 1, app.ctx)
 	app.ctx.draw_circle_filled(f32(400), f32(400), f32(2), bg_color)
 	app.ctx.end()
 }

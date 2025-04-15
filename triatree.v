@@ -33,6 +33,7 @@ mut:
 }
 
 struct Hexa_world {
+mut:
 	world []Triatree_Ensemble
 }
 
@@ -300,8 +301,9 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, parent Triatree_Ensemble, ctx gg.Context) {
 	match tree.compo {
 		Elements {
-			pos := pos_center + (coo_tria_to_cart(tree.coo, rota, tree.dimension + tree.coo.len)).mul_scalar(zomm_factor)
-			mut angle := - rota - math.pi / 6
+			pos := pos_center + (coo_tria_to_cart(tree.coo, rota, tree.dimension +
+				tree.coo.len)).mul_scalar(zomm_factor)
+			mut angle := -rota - math.pi / 6
 
 			mut is_reverse := false
 			for elem in tree.coo {
@@ -318,24 +320,29 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, parent 
 				elements_caras[tree.compo].color)
 		}
 		Childs {
-			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zomm_factor, parent, ctx)
-			parent.liste_tree[tree.compo.up].draw(pos_center, rota, zomm_factor, parent, ctx)
-			parent.liste_tree[tree.compo.left].draw(pos_center, rota, zomm_factor, parent, ctx)
-			parent.liste_tree[tree.compo.right].draw(pos_center, rota, zomm_factor, parent, ctx)
+			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zomm_factor, parent,
+				ctx)
+			parent.liste_tree[tree.compo.up].draw(pos_center, rota, zomm_factor, parent,
+				ctx)
+			parent.liste_tree[tree.compo.left].draw(pos_center, rota, zomm_factor, parent,
+				ctx)
+			parent.liste_tree[tree.compo.right].draw(pos_center, rota, zomm_factor, parent,
+				ctx)
 		}
 	}
 }
 
-fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, ctx gg.Context){
-	if tria_ensemble.liste_tree.len != 0{
-		tria_ensemble.liste_tree[0].draw(pos_center, rota, zomm_factor, tria_ensemble, ctx)
+fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, ctx gg.Context) {
+	if tria_ensemble.liste_tree.len != 0 {
+		tria_ensemble.liste_tree[0].draw(pos_center, rota, zomm_factor, tria_ensemble,
+			ctx)
 	}
 }
 
-fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, ctx gg.Context){
-	for i in 0..6{
-		if hexa_world.world[i].liste_tree.len != 0{
-			angle := rota + i*math.pi/3
+fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, current int, ctx gg.Context) {
+	for i in 0 .. 6 {
+		if hexa_world.world[i].liste_tree.len != 0 {
+			angle := rota + (i - f32(current))* math.pi / 3
 
 			dim := hexa_world.world[i].liste_tree[0].dimension
 			dist := f32(math.pow(2, dim) / math.sqrt(3))
@@ -514,6 +521,16 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 			}
 			else {}
 		}
+	}
+}
+
+fn (mut tria_ensemble Triatree_Ensemble) divide(){
+	tria_ensemble.liste_tree[0].divide(mut tria_ensemble)
+}
+
+fn (mut hexa_world Hexa_world) divide(){
+	for mut tria_ensemble in hexa_world.world{
+		tria_ensemble.divide()
 	}
 }
 

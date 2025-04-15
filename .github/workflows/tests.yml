@@ -28,10 +28,11 @@ jobs:
         run: |
           wget -qO /tmp/v.zip https://github.com/vlang/v/releases/latest/download/v_linux.zip
           unzip -q /tmp/v.zip -d /tmp
-
+          echo /tmp/v >> "$GITHUB_PATH"
+          
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: |
-          tmp/v -silent test-cleancode
-          tmp/v test .
+          v -silent test-cleancode
+          v test .
 

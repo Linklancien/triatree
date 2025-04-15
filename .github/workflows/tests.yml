@@ -31,6 +31,7 @@ jobs:
           echo /tmp/v >> "$GITHUB_PATH"
           sudo apt install mesa-common-dev
           sudo apt install libxi-dev
+          sudo apt install libxcursor-dev
           
       # Runs a single command using the runners shell
       - name: tests

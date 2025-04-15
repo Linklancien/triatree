@@ -29,6 +29,7 @@ jobs:
           wget -qO /tmp/v.zip https://github.com/vlang/v/releases/latest/download/v_linux.zip
           unzip -q /tmp/v.zip -d /tmp
           echo /tmp/v >> "$GITHUB_PATH"
+          apt install mesa-common-dev
           
       # Runs a single command using the runners shell
       - name: tests

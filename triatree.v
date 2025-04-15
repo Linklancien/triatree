@@ -342,7 +342,7 @@ fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zomm_f
 fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, current int, ctx gg.Context) {
 	for i in 0 .. 6 {
 		if hexa_world.world[i].liste_tree.len != 0 {
-			angle := rota + (i - f32(current))* math.pi / 3
+			angle := rota + (i - f32(current)) * math.pi / 3
 
 			dim := hexa_world.world[i].liste_tree[0].dimension
 			dist := f32(math.pow(2, dim) / math.sqrt(3))
@@ -524,12 +524,12 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 	}
 }
 
-fn (mut tria_ensemble Triatree_Ensemble) divide(){
+fn (mut tria_ensemble Triatree_Ensemble) divide() {
 	tria_ensemble.liste_tree[0].divide(mut tria_ensemble)
 }
 
-fn (mut hexa_world Hexa_world) divide(){
-	for mut tria_ensemble in hexa_world.world{
+fn (mut hexa_world Hexa_world) divide() {
+	for mut tria_ensemble in hexa_world.world {
 		tria_ensemble.divide()
 	}
 }

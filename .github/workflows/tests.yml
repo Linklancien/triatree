@@ -31,8 +31,8 @@ jobs:
           echo /tmp/v >> "$GITHUB_PATH"
           
       # Runs a single command using the runners shell
-      - name: formatting
-        run: v fmt -verify .
       - name: tests
         run: v -stats test .
+      - name: formatting
+        run: v fmt -verify .
 

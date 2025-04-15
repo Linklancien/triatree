@@ -10,7 +10,7 @@ struct App {
 mut:
 	ctx &gg.Context = unsafe { nil }
 
-	tria_ensemble Triatree_Ensemble
+	carte Hexa_world
 }
 
 fn main() {
@@ -29,15 +29,29 @@ fn main() {
 		sample_count:  4
 	)
 
-	app.tria_ensemble.liste_tree << Triatree{
-		compo:     Elements.wood
-		id:        app.tria_ensemble.liste_tree.len
-		dimension: 8
-		coo:       []
+	// app.tria_ensemble.liste_tree << Triatree{
+	// 	compo:     Elements.wood
+	// 	id:        app.tria_ensemble.liste_tree.len
+	// 	dimension: 8
+	// 	coo:       []
+	// }
+	// app.tria_ensemble.liste_tree[0].divide(mut app.tria_ensemble)
+	// app.tria_ensemble.liste_tree[3].divide(mut app.tria_ensemble)
+	// app.tria_ensemble.liste_tree[2].divide(mut app.tria_ensemble)
+
+	app.carte = Hexa_world{
+		world: []Triatree_Ensemble{len:6, init: 
+			Triatree_Ensemble {
+				liste_tree: []Triatree{len:1, init: Triatree{
+						compo:     Elements.wood
+						id:        index
+						dimension: 8
+						coo:       []
+					}
+				}
+			}
+		}
 	}
-	app.tria_ensemble.liste_tree[0].divide(mut app.tria_ensemble)
-	app.tria_ensemble.liste_tree[3].divide(mut app.tria_ensemble)
-	app.tria_ensemble.liste_tree[2].divide(mut app.tria_ensemble)
 
 	app.ctx.run()
 }
@@ -47,7 +61,7 @@ fn on_init(mut app App) {}
 fn on_frame(mut app App) {
 	app.ctx.begin()
 	screen_center := vec2[f32](f32(app.ctx.width/2), f32(-app.ctx.height/2))
-	app.tria_ensemble.draw(screen_center, 0, 1, app.ctx)
+	app.carte.draw(screen_center, 0, 1, app.ctx)
 	app.ctx.draw_circle_filled(f32(400), f32(400), f32(2), bg_color)
 	app.ctx.end()
 }

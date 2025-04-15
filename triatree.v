@@ -316,8 +316,6 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, parent 
 			size := f32(zomm_factor * math.pow(2, tree.dimension) / math.sqrt(3)) - 1
 			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
 				elements_caras[tree.compo].color)
-
-			// ctx.draw_circle_empty(pos.x, -pos.y, size, gg.Color{255, 0, 0, 255})
 		}
 		Childs {
 			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zomm_factor, parent, ctx)
@@ -337,8 +335,13 @@ fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zomm_f
 fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, ctx gg.Context){
 	for i in 0..6{
 		if hexa_world.world[i].liste_tree.len != 0{
-			angle := rota + math.pi/6 + i*math.pi/3
-			hexa_world.world[i].draw(pos_center, angle, zomm_factor, ctx)
+			angle := rota + i*math.pi/3
+
+			dim := hexa_world.world[i].liste_tree[0].dimension
+			dist := f32(math.pow(2, dim) / math.sqrt(3))
+			pos := pos_center + (vec2[f32](0, dist)).rotate_around_ccw(center, angle)
+
+			hexa_world.world[i].draw(pos, angle, zomm_factor, ctx)
 		}
 	}
 }

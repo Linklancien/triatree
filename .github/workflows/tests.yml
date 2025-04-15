@@ -1,0 +1,65 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+      - uses: vlang/setup-v@v1.4
+        with:
+          # Personal access token (PAT) used to fetch the repository. The PAT is configured
+          # with the local git config, which enables your scripts to run authenticated git
+          # commands. The post-job step removes the PAT.
+          #
+          # We recommend using a service account with the least permissions necessary.
+          # Also when generating a new PAT, select the least scopes necessary.
+          #
+          # [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+          #
+          # Default: ${{ github.token }}
+          token: ''
+      
+          # Version to use. It can be the branch, tag or SHA to checkout from the V repository.
+          # Examples: 0.2.4, weekly.2022.07
+          version: ''
+      
+          # File containing the version to use. It can contain the branch, tag or SHA to checkout from the V repository
+          # Examples: .v-version
+          version-file: ''
+      
+          # Set this option if you want the action to check for the latest available version of V.
+          # If `stable` is false, it will check for the latest commit from the default branch.
+          check-latest: true
+      
+          # Set this option if you want the action to use the stable version of V.
+          # Will be ignored if `check-latest` is false.
+          stable: false
+      
+          # Target architecture for V to use. Examples: linux, macos, windows. Will use system architecture by default.
+          architecture: ''
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: |
+          v-bin-path -silent test-cleancode
+          v-bin-path test .
+

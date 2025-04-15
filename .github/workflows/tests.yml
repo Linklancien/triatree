@@ -24,42 +24,14 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-      - uses: vlang/setup-v@v1.4
-        with:
-          # Personal access token (PAT) used to fetch the repository. The PAT is configured
-          # with the local git config, which enables your scripts to run authenticated git
-          # commands. The post-job step removes the PAT.
-          #
-          # We recommend using a service account with the least permissions necessary.
-          # Also when generating a new PAT, select the least scopes necessary.
-          #
-          # [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
-          #
-          # Default: ${{ github.token }}
-          token: ''
-      
-          # Version to use. It can be the branch, tag or SHA to checkout from the V repository.
-          # Examples: 0.2.4, weekly.2022.07
-          version: ''
-      
-          # File containing the version to use. It can contain the branch, tag or SHA to checkout from the V repository
-          # Examples: .v-version
-          version-file: ''
-      
-          # Set this option if you want the action to check for the latest available version of V.
-          # If `stable` is false, it will check for the latest commit from the default branch.
-          check-latest: true
-      
-          # Set this option if you want the action to use the stable version of V.
-          # Will be ignored if `check-latest` is false.
-          stable: false
-      
-          # Target architecture for V to use. Examples: linux, macos, windows. Will use system architecture by default.
-          architecture: ''
+      - name: Setup V
+        run: |
+          wget -qO /tmp/v.zip https://github.com/vlang/v/releases/latest/download/v_linux.zip
+          unzip -q /tmp/v.zip -d /tmp
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: |
-          v-bin-path -silent test-cleancode
-          v-bin-path test .
+          tmp/v -silent test-cleancode
+          tmp/v test .
 

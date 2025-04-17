@@ -360,6 +360,7 @@ fn test_divide_and_merge() {
 		assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for ${i}; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
 		assert ensemble.liste_tree.len == (5 + i), 'assertion failed for ${i} not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: (5 + i): ${
 			5 + i} '
+
 		assert ensemble.free_index.len == (i - 4), 'assertion failed for ${i} not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: ${i} '
 		assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed for ${i} tree is not mergeable'
 	}

@@ -556,9 +556,9 @@ fn (mut tria_ensemble Triatree_Ensemble) divide_rec(index int) {
 }
 
 // Divide for HEXA_WORLD:
-fn (mut hexa_world Hexa_world) divide() {
+fn (mut hexa_world Hexa_world) divide(index int) {
 	for mut tria_ensemble in hexa_world.world {
-		tria_ensemble.divide(0)
+		tria_ensemble.divide(index)
 	}
 }
 
@@ -592,17 +592,15 @@ fn (tree Triatree) merge(mut parent Triatree_Ensemble) {
 	}
 }
 
-// Merge
+// Merge for TRIATREE_ENSEMBLE
 fn (mut tria_ensemble Triatree_Ensemble) merge(index int) {
 	tria_ensemble.liste_tree[index].merge(mut tria_ensemble)
 }
 
-fn (mut tria_ensemble Triatree_Ensemble) merge_rec(index int) {
-	match tria_ensemble.liste_tree[index].compo {
-		Childs {
-			tria_ensemble.liste_tree[index].merge(mut tria_ensemble)
-		}
-		else {}
+// Merge for HEXA_WORLD:
+fn (mut hexa_world Hexa_world) merge(index int) {
+	for mut tria_ensemble in hexa_world.world {
+		tria_ensemble.merge(index)
 	}
 }
 

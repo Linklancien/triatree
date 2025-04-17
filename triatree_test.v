@@ -364,6 +364,37 @@ fn test_divide_and_merge() {
 	}
 	println('success')
 
+	print('test 4 in hexa_world: ')
+	mut hexa_world := Hexa_world{
+		world: []Triatree_Ensemble{len: 6, init: Triatree_Ensemble{
+			liste_tree: []Triatree{len: 1, init: Triatree{
+				compo:     Elements.wood
+				id:        index
+				dimension: 8
+				coo:       []
+			}}
+		}}
+	}
+
+	for i in 0 .. 5 {
+		if i % 2 == 0 {
+			hexa_world.divide(0)
+			for ens in hexa_world.world{
+				assert ens.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ens.liste_tree[0] have wrong name ens: ${ens}'
+				assert ens.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ens.liste_tree: ${ens.liste_tree.len} expected: 5 '
+				assert ens.free_index.len == 0, 'assertion failed for divide not enough triatree in ens.free_index: ${ens.free_index.len} expected: 0 '
+				assert ens.liste_tree[0].check_mergeable(ens) == true, 'assertion failed after being divide tree is not mergeable'
+			}
+		} else {
+			hexa_world.merge(0)
+			for ens in hexa_world.world{
+				assert ens.liste_tree[0].compo.type_name() == 'Elements', 'assertion failed for merge; ens.liste_tree[0] have wrong name ens: ${ens}'
+				assert ens.free_index.len == 4, 'assertion failed for merge not enough triatree in ens.free_index: ${ens.free_index.len} expected: $4 '
+			}
+		}
+	}
+	println('success')
+
 	println('Passed')
 	println('--------------------')
 }

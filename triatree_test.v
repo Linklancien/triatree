@@ -294,6 +294,113 @@ fn test_gravity() {
 	println('--------------------')
 }
 
+fn test_divide_and_merge() {
+	println('--------------------')
+	println('test_divide_and_merge():')
+
+	print('test 1 in ensemble: ')
+	mut ensemble := Triatree_Ensemble{
+		liste_tree: []Triatree{len: 1, init: Triatree{
+			compo:     Elements.wood
+			id:        index
+			dimension: 8
+			coo:       []
+		}}
+	}
+	for i in 0 .. 5 {
+		if i % 2 == 0 {
+			ensemble.divide(0)
+			assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+			assert ensemble.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: 5 '
+			assert ensemble.free_index.len == 0, 'assertion failed for divide not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: 0 '
+			assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed after being divide tree is not mergeable'
+		} else {
+			ensemble.merge(0)
+			assert ensemble.liste_tree[0].compo.type_name() == 'Elements', 'assertion failed for merge; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+			assert ensemble.free_index.len == 4, 'assertion failed for merge not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: $4 '
+		}
+	}
+	println('success')
+
+	print('test 2 free liste no empty:')
+	mut indexs := []int{}
+	for i in 1 .. 4 {
+		indexs << [i]
+		ensemble = Triatree_Ensemble{
+			free_index: indexs
+			liste_tree: []Triatree{len: 1 + i, init: Triatree{
+				compo:     Elements.wood
+				id:        index
+				dimension: 8
+				coo:       []
+			}}
+		}
+		ensemble.divide(0)
+		assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+		assert ensemble.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: 5 '
+		assert ensemble.free_index.len == 0, 'assertion failed for divide not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: 0 '
+		assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed after being divide tree is not mergeable'
+	}
+	println('success')
+
+	print('test 3 free liste len > 4:')
+	indexs = [1, 2, 3, 4]
+	for i in 5 .. 8 {
+		indexs << [i]
+		ensemble = Triatree_Ensemble{
+			free_index: indexs
+			liste_tree: []Triatree{len: 5 + i, init: Triatree{
+				compo:     Elements.wood
+				id:        index
+				dimension: 8
+				coo:       []
+			}}
+		}
+		ensemble.divide(0)
+		assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for ${i}; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+		assert ensemble.liste_tree.len == (5 + i), 'assertion failed for ${i} not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: (5 + i): ${
+			5 + i} '
+
+		assert ensemble.free_index.len == (i - 4), 'assertion failed for ${i} not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: ${i} '
+		assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed for ${i} tree is not mergeable'
+	}
+	println('success')
+
+	print('test 4 in hexa_world: ')
+	mut hexa_world := Hexa_world{
+		world: []Triatree_Ensemble{len: 6, init: Triatree_Ensemble{
+			liste_tree: []Triatree{len: 1, init: Triatree{
+				compo:     Elements.wood
+				id:        index
+				dimension: 8
+				coo:       []
+			}}
+		}}
+	}
+
+	for i in 0 .. 5 {
+		if i % 2 == 0 {
+			hexa_world.divide(0)
+			for ens in hexa_world.world {
+				assert ens.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ens.liste_tree[0] have wrong name ens: ${ens}'
+				assert ens.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ens.liste_tree: ${ens.liste_tree.len} expected: 5 '
+				assert ens.free_index.len == 0, 'assertion failed for divide not enough triatree in ens.free_index: ${ens.free_index.len} expected: 0 '
+				assert ens.liste_tree[0].check_mergeable(ens) == true, 'assertion failed after being divide tree is not mergeable'
+			}
+		} else {
+			hexa_world.merge(0)
+			for ens in hexa_world.world {
+				assert ens.liste_tree[0].compo.type_name() == 'Elements', 'assertion failed for merge; ens.liste_tree[0] have wrong name ens: ${ens}'
+				assert ens.free_index.len == 4, 'assertion failed for merge not enough triatree in ens.free_index: ${ens.free_index.len} expected: $4 '
+			}
+		}
+	}
+	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
 // utilitary
 fn test_check_reverse() {
 	println('--------------------')

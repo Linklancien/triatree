@@ -28,7 +28,7 @@ type Self = Elements | Childs
 
 struct Triatree_Ensemble {
 mut:
-	free_index []int
+	free_index []int // len%4 == 0 always ?
 	liste_tree []Triatree
 }
 
@@ -316,8 +316,10 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, parent 
 				angle += math.pi
 			}
 			size := f32(zomm_factor * math.pow(2, tree.dimension) / math.sqrt(3)) - 1
+			ctx.begin()
 			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
 				elements_caras[tree.compo].color)
+			ctx.end(how: .passthru)
 		}
 		Childs {
 			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zomm_factor, parent,
@@ -342,7 +344,7 @@ fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zomm_f
 fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, current int, ctx gg.Context) {
 	for i in 0 .. 6 {
 		if hexa_world.world[i].liste_tree.len != 0 {
-			angle := rota + (i - f32(current))* math.pi / 3
+			angle := rota + (i - f32(current)) * math.pi / 3
 
 			dim := hexa_world.world[i].liste_tree[0].dimension
 			dist := f32(math.pow(2, dim) / math.sqrt(3))
@@ -354,9 +356,9 @@ fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zomm_factor f32,
 }
 
 // find
-fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) &Triatree {
+fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) int {
 	if coo == tree.coo {
-		return &tree
+		return tree.id
 	}
 	match tree.compo {
 		Childs {
@@ -370,9 +372,13 @@ fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) &Triatree {
 				return parent.liste_tree[tree.compo.right].go_to(coo[1..], parent)
 			}
 		}
-		else {}
+		Elements {
+			// closest parent
+			return tree.id
+		}
 	}
-	return &tree
+	panic('not found')
+	return -1
 }
 
 // PHYSIC:
@@ -473,7 +479,10 @@ fn gravity(coo []int, center int) []int {
 	return next
 }
 
-// divide & merge:
+// DIVIDE & MERGE:
+// DIVIDE:
+
+// Divide for TRIATREE
 fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 	if tree.dimension > 0 {
 		match tree.compo {
@@ -486,19 +495,24 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 					mut id := -1
 					if parent.free_index.len != 0 {
 						id = parent.free_index.pop()
-					} else {
-						id = parent.liste_tree.len
-					}
-					ids << [id]
-
-					parent.liste_tree << [
-						Triatree{
+						parent.liste_tree[id] = Triatree{
 							compo:     tree.compo
 							id:        id
 							dimension: (tree.dimension - 1)
 							coo:       next_coo
-						},
-					]
+						}
+					} else {
+						id = parent.liste_tree.len
+						parent.liste_tree << [
+							Triatree{
+								compo:     tree.compo
+								id:        id
+								dimension: (tree.dimension - 1)
+								coo:       next_coo
+							},
+						]
+					}
+					ids << [id]
 				}
 				parent.liste_tree[tree.id] = Triatree{
 					compo:     Childs{
@@ -511,26 +525,82 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 					dimension: tree.dimension
 					coo:       tree.coo.clone()
 				}
-
-				// tree.compo = Childs{
-				// 	mid:   ids[0]
-				// 	up:    ids[1]
-				// 	left:  ids[2]
-				// 	right: ids[3]
-				// }
 			}
 			else {}
 		}
 	}
 }
 
-fn (mut tria_ensemble Triatree_Ensemble) divide(){
-	tria_ensemble.liste_tree[0].divide(mut tria_ensemble)
+// Divide for TRIA_ENSEMBLE:
+fn (mut tria_ensemble Triatree_Ensemble) divide(index int) {
+	match tria_ensemble.liste_tree[index].compo {
+		Elements {
+			tria_ensemble.liste_tree[index].divide(mut tria_ensemble)
+		}
+		else {}
+	}
 }
 
-fn (mut hexa_world Hexa_world) divide(){
-	for mut tria_ensemble in hexa_world.world{
-		tria_ensemble.divide()
+fn (mut tria_ensemble Triatree_Ensemble) divide_rec(index int) {
+	match tria_ensemble.liste_tree[index].compo {
+		Elements {
+			tria_ensemble.liste_tree[index].divide(mut tria_ensemble)
+		}
+		Childs {
+			tria_ensemble.divide_rec(tria_ensemble.liste_tree[index].compo.mid)
+			tria_ensemble.divide_rec(tria_ensemble.liste_tree[index].compo.up)
+			tria_ensemble.divide_rec(tria_ensemble.liste_tree[index].compo.left)
+			tria_ensemble.divide_rec(tria_ensemble.liste_tree[index].compo.right)
+		}
+	}
+}
+
+// Divide for HEXA_WORLD:
+fn (mut hexa_world Hexa_world) divide(index int) {
+	for mut tria_ensemble in hexa_world.world {
+		tria_ensemble.divide(index)
+	}
+}
+
+fn (mut hexa_world Hexa_world) divide_rec() {
+	for mut tria_ensemble in hexa_world.world {
+		tria_ensemble.divide_rec(0)
+	}
+}
+
+// MERGE:
+
+// Merge for TRIATREE
+fn (tree Triatree) merge(mut parent Triatree_Ensemble) {
+	match tree.compo {
+		Childs {
+			if tree.check_mergeable(parent) {
+				parent.free_index << [tree.compo.mid]
+				parent.free_index << [tree.compo.up]
+				parent.free_index << [tree.compo.left]
+				parent.free_index << [tree.compo.right]
+
+				parent.liste_tree[tree.id] = Triatree{
+					compo:     parent.liste_tree[tree.compo.mid].compo
+					id:        tree.id
+					dimension: tree.dimension
+					coo:       tree.coo.clone()
+				}
+			}
+		}
+		else {}
+	}
+}
+
+// Merge for TRIATREE_ENSEMBLE
+fn (mut tria_ensemble Triatree_Ensemble) merge(index int) {
+	tria_ensemble.liste_tree[index].merge(mut tria_ensemble)
+}
+
+// Merge for HEXA_WORLD:
+fn (mut hexa_world Hexa_world) merge(index int) {
+	for mut tria_ensemble in hexa_world.world {
+		tria_ensemble.merge(index)
 	}
 }
 
@@ -557,6 +627,27 @@ fn check_reverse(coo []int) bool {
 		}
 	}
 	return is_reverse
+}
+
+// check if the triatree can be merge -> if it as childs that all have the same compo
+fn (tree Triatree) check_mergeable(parent Triatree_Ensemble) bool {
+	match tree.compo {
+		Childs {
+			if parent.liste_tree[tree.compo.mid].compo != parent.liste_tree[tree.compo.up].compo {
+				return false
+			}
+			if parent.liste_tree[tree.compo.mid].compo != parent.liste_tree[tree.compo.left].compo {
+				return false
+			}
+			if parent.liste_tree[tree.compo.mid].compo != parent.liste_tree[tree.compo.right].compo {
+				return false
+			}
+			return true
+		}
+		else {
+			return false
+		}
+	}
 }
 
 // very usefull:

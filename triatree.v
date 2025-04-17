@@ -28,7 +28,7 @@ type Self = Elements | Childs
 
 struct Triatree_Ensemble {
 mut:
-	free_index []int
+	free_index []int // len%4 == 0 always ?
 	liste_tree []Triatree
 }
 
@@ -495,19 +495,24 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 					mut id := -1
 					if parent.free_index.len != 0 {
 						id = parent.free_index.pop()
-					} else {
-						id = parent.liste_tree.len
-					}
-					ids << [id]
-
-					parent.liste_tree << [
-						Triatree{
+						parent.liste_tree[id] = Triatree{
 							compo:     tree.compo
 							id:        id
 							dimension: (tree.dimension - 1)
 							coo:       next_coo
-						},
-					]
+						}
+					} else {
+						id = parent.liste_tree.len
+						parent.liste_tree << [
+							Triatree{
+								compo:     tree.compo
+								id:        id
+								dimension: (tree.dimension - 1)
+								coo:       next_coo
+							},
+						]
+					}
+					ids << [id]
 				}
 				parent.liste_tree[tree.id] = Triatree{
 					compo:     Childs{
@@ -566,14 +571,14 @@ fn (mut hexa_world Hexa_world) divide_rec() {
 // MERGE:
 
 // Merge for TRIATREE
-fn (mut tree Triatree) merge(mut parent Triatree_Ensemble) {
-	match mut tree.compo {
+fn (tree Triatree) merge(mut parent Triatree_Ensemble) {
+	match tree.compo {
 		Childs {
 			if tree.check_mergeable(parent) {
-				parent.free_index << tree.compo.mid
-				parent.free_index << tree.compo.up
-				parent.free_index << tree.compo.left
-				parent.free_index << tree.compo.right
+				parent.free_index << [tree.compo.mid]
+				parent.free_index << [tree.compo.up]
+				parent.free_index << [tree.compo.left]
+				parent.free_index << [tree.compo.right]
 
 				parent.liste_tree[tree.id] = Triatree{
 					compo:     parent.liste_tree[tree.compo.mid].compo
@@ -589,12 +594,7 @@ fn (mut tree Triatree) merge(mut parent Triatree_Ensemble) {
 
 // Merge
 fn (mut tria_ensemble Triatree_Ensemble) merge(index int) {
-	match tria_ensemble.liste_tree[index].compo {
-		Elements {
-			tria_ensemble.liste_tree[index].merge(mut tria_ensemble)
-		}
-		else {}
-	}
+	tria_ensemble.liste_tree[index].merge(mut tria_ensemble)
 }
 
 fn (mut tria_ensemble Triatree_Ensemble) merge_rec(index int) {
@@ -635,13 +635,13 @@ fn check_reverse(coo []int) bool {
 fn (tree Triatree) check_mergeable(parent Triatree_Ensemble) bool {
 	match tree.compo {
 		Childs {
-			if parent.liste_tree[tree.compo.mid] != parent.liste_tree[tree.compo.up] {
+			if parent.liste_tree[tree.compo.mid].compo != parent.liste_tree[tree.compo.up].compo {
 				return false
 			}
-			if parent.liste_tree[tree.compo.mid] != parent.liste_tree[tree.compo.left] {
+			if parent.liste_tree[tree.compo.mid].compo != parent.liste_tree[tree.compo.left].compo {
 				return false
 			}
-			if parent.liste_tree[tree.compo.mid] != parent.liste_tree[tree.compo.right] {
+			if parent.liste_tree[tree.compo.mid].compo != parent.liste_tree[tree.compo.right].compo {
 				return false
 			}
 			return true

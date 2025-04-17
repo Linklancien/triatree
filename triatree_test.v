@@ -294,6 +294,55 @@ fn test_gravity() {
 	println('--------------------')
 }
 
+fn test_divide_and_merge() {
+	println('--------------------')
+	println('test_divide_and_merge():')
+
+	print('test 1 in ensemble: ')
+	mut ensemble := Triatree_Ensemble{
+		liste_tree: []Triatree{len: 1, init: Triatree{
+			compo:     Elements.wood
+			id:        index
+			dimension: 8
+			coo:       []
+		}}
+	}
+	for i in 0 .. 5 {
+		if i % 2 == 0 {
+			ensemble.divide(0)
+			assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+			assert ensemble.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: $5 '
+			assert ensemble.free_index.len == 0, 'assertion failed for merge not enough triatree in ensemble.liste_tree: ${ensemble.free_index.len} expected: $4 '
+			assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed after being divide tree is not mergeable'
+		} else {
+			ensemble.merge(0)
+			assert ensemble.liste_tree[0].compo.type_name() == 'Elements', 'assertion failed for merge; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+			assert ensemble.free_index.len == 4, 'assertion failed for merge not enough triatree in ensemble.liste_tree: ${ensemble.free_index.len} expected: $4 '
+		}
+	}
+	println('success')
+
+	print('test 2 free liste no empty:')
+	ensemble = Triatree_Ensemble{
+		free_index: [1]
+		liste_tree: []Triatree{len: 2, init: Triatree{
+			compo:     Elements.wood
+			id:        index
+			dimension: 8
+			coo:       []
+		}}
+	}
+	ensemble.divide(0)
+	assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+	assert ensemble.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: $5 '
+	assert ensemble.free_index.len == 0, 'assertion failed for merge not enough triatree in ensemble.liste_tree: ${ensemble.free_index.len} expected: $4 '
+	assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed after being divide tree is not mergeable'
+	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
 // utilitary
 fn test_check_reverse() {
 	println('--------------------')

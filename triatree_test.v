@@ -311,32 +311,57 @@ fn test_divide_and_merge() {
 		if i % 2 == 0 {
 			ensemble.divide(0)
 			assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
-			assert ensemble.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: $5 '
-			assert ensemble.free_index.len == 0, 'assertion failed for merge not enough triatree in ensemble.liste_tree: ${ensemble.free_index.len} expected: $4 '
+			assert ensemble.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: 5 '
+			assert ensemble.free_index.len == 0, 'assertion failed for divide not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: 0 '
 			assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed after being divide tree is not mergeable'
 		} else {
 			ensemble.merge(0)
 			assert ensemble.liste_tree[0].compo.type_name() == 'Elements', 'assertion failed for merge; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
-			assert ensemble.free_index.len == 4, 'assertion failed for merge not enough triatree in ensemble.liste_tree: ${ensemble.free_index.len} expected: $4 '
+			assert ensemble.free_index.len == 4, 'assertion failed for merge not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: $4 '
 		}
 	}
 	println('success')
 
 	print('test 2 free liste no empty:')
-	ensemble = Triatree_Ensemble{
-		free_index: [1]
-		liste_tree: []Triatree{len: 2, init: Triatree{
-			compo:     Elements.wood
-			id:        index
-			dimension: 8
-			coo:       []
-		}}
+	mut indexs := []int{}
+	for i in 1..4{
+		indexs << [i]
+		ensemble = Triatree_Ensemble{
+			free_index: indexs
+			liste_tree: []Triatree{len: 1 + i, init: Triatree{
+				compo:     Elements.wood
+				id:        index
+				dimension: 8
+				coo:       []
+			}}
+		}
+		ensemble.divide(0)
+		assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+		assert ensemble.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: 5 '
+		assert ensemble.free_index.len == 0, 'assertion failed for divide not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: 0 '
+		assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed after being divide tree is not mergeable'
 	}
-	ensemble.divide(0)
-	assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for divide; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
-	assert ensemble.liste_tree.len == 5, 'assertion failed for divide not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: $5 '
-	assert ensemble.free_index.len == 0, 'assertion failed for merge not enough triatree in ensemble.liste_tree: ${ensemble.free_index.len} expected: $4 '
-	assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed after being divide tree is not mergeable'
+	println('success')
+
+	print('test 3 free liste len > 4:') 
+	indexs = [1, 2, 3, 4]
+	for i in 5..8{
+		indexs << [i]
+		ensemble = Triatree_Ensemble{
+			free_index: indexs
+			liste_tree: []Triatree{len: 5 + i, init: Triatree{
+				compo:     Elements.wood
+				id:        index
+				dimension: 8
+				coo:       []
+			}}
+		}
+		ensemble.divide(0)
+		assert ensemble.liste_tree[0].compo.type_name() == 'Childs', 'assertion failed for $i; ensemble.liste_tree[0] have wrong name ensemble: ${ensemble}'
+		assert ensemble.liste_tree.len == (5 + i), 'assertion failed for $i not enough triatree in ensemble.liste_tree: ${ensemble.liste_tree.len} expected: (5 + i): ${5 + i} '
+		assert ensemble.free_index.len == (i - 4), 'assertion failed for $i not enough triatree in ensemble.free_index: ${ensemble.free_index.len} expected: $i '
+		assert ensemble.liste_tree[0].check_mergeable(ensemble) == true, 'assertion failed for $i tree is not mergeable'
+	}
 	println('success')
 
 	println('Passed')

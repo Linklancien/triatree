@@ -235,23 +235,30 @@ fn test_gravity() {
 		for x in 0 .. 3 {
 			for y in 0 .. 3 {
 				for z in 0 .. 3 {
-					pos := [x, y, z]
-					n := pos.len
-					is_reverse := check_reverse(pos)
-					liste_next := gravity(pos, gravity_center)
+					coo := [x, y, z]
+					n := coo.len
+					is_reverse := check_reverse(coo)
+					liste_next := gravity(coo, gravity_center)
+					nei := neighbors(coo)
 
-					assert liste_next.len <= 2, 'assertion failed for lens : pos: ${pos}, liste_next: ${liste_next}, gravity_center: ${gravity_center}'
+					assert liste_next.len != 0, 'assertion failed for lens : nei: ${nei}, liste_next: ${liste_next}, coo: ${coo},  gravity_center: ${gravity_center}'
+					assert liste_next.len <= 2, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
 
 					for next in liste_next {
-						assert next.len == pos.len, 'assertion failed for lens : pos: ${pos}, next: ${next}, gravity_center: ${gravity_center}'
+						assert next.len == coo.len, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
 					}
 					if z == gravity_center {
 						if x == z && y == z {
-							assert liste_next[0] == pos, 'assertion failed for lens : pos: ${pos}, liste_next: ${liste_next}, gravity_center: ${gravity_center}'
+							assert liste_next[0] == coo, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
 						} else if is_reverse {
-							assert liste_next[0][n - 1] == 0, 'assertion failed for lens : pos: ${pos}, liste_next: ${liste_next}, gravity_center: ${gravity_center}'
+							assert liste_next[0][n - 1] == 0, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
+						}
+					}
+					if z == 0 {
+						if is_reverse {
+							assert liste_next.len == 2, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
 						} else {
-							// assert liste_next.len == 2, 'assertion failed for lens : pos: ${pos}, liste_next: ${liste_next}, gravity_center: ${gravity_center}'
+							assert liste_next.len == 1, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
 						}
 					}
 				}

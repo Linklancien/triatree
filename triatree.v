@@ -419,13 +419,13 @@ fn gravity(coo []int, center int) [][]int {
 				}
 			}
 		} else if coo[n - 1] == 0 {
+			mut next := [][]int{}
 			for neighbor in nei {
-				mut next := [][]int{}
 				if neighbor[n - 1] != center {
 					next << [neighbor]
 				}
-				return next
 			}
+			return next
 		} else {
 			other := remove_from_base([1, 2, 3], [center, coo[n - 1]])
 			for neighbor in nei {
@@ -436,13 +436,13 @@ fn gravity(coo []int, center int) [][]int {
 		}
 	} else {
 		if coo[n - 1] == center {
+			mut next := [][]int{}
 			for neighbor in nei {
-				mut next := [][]int{}
 				if neighbor[n - 1] != 0 {
 					next << [neighbor]
 				}
-				return next
 			}
+			return next
 		} else if coo[n - 1] == 0 {
 			for neighbor in nei {
 				if neighbor[n - 1] == center {

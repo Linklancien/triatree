@@ -3,7 +3,6 @@ module main
 import math
 import math.vec { Vec2, vec2 }
 import gg
-import rand
 
 const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
@@ -292,7 +291,7 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 		}
 	}
 
-	// else{panic("A 0 without 3 neigbors in it's base ??? coo: ${coo} current: ${current}")}
+	// else{panic("A 0 without 3 neighbors in it's base ??? coo: ${coo} current: ${current}")}
 	// coo is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
 }
@@ -386,7 +385,7 @@ fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) int {
 // maybe change by adding a new fonction
 
 // take a position, and a corner towards which is applied the gravity and return the next likely position
-fn gravity(coo []int, center int) []int {
+fn gravity(coo []int, center int) [][]int {
 	n := coo.len
 
 	if coo == [] {
@@ -408,75 +407,62 @@ fn gravity(coo []int, center int) []int {
 	}
 
 	if is_center {
-		return coo
+		return [coo]
 	}
 
 	nei := neighbors(coo)
-	mut next := coo[..n - 1].clone()
 	if is_reverse {
-		if coo[n - 1] == 0 {
-			next_final_nei := remove_from_base(triabase, [0, center])
-			mut final_co := 0
-			if rand.bernoulli(0.5) or { false } {
-				final_co = next_final_nei[0]
-			} else {
-				final_co = next_final_nei[1]
-			}
-
-			// used to find the neighbor that end with the desired value
-			for elem in nei {
-				if elem[n - 1] == final_co {
-					next = elem.clone()
-					break
+		if coo[n - 1] == center{
+			for neighbor in nei{
+				if neighbor[n - 1] == 0{
+					return [neighbor]
 				}
 			}
-		} else if coo[n - 1] == center {
-			next << 0
-		} else {
-			final_co := remove_from_base(triabase, [0, center, coo[n - 1]])[0]
-			for elem in nei {
-				if elem[n - 1] == final_co {
-					next = elem.clone()
-					break
+		}
+		else if coo[n - 1] == 0 {
+			for neighbor in nei{
+				mut next := [][]int{}
+				if neighbor[n - 1] != center{
+					next << [neighbor]
+				}
+				return next
+			}
+		}
+		else{
+			other := remove_from_base([1, 2, 3], [center, coo[n-1]])
+			for neighbor in nei{
+				if neighbor[n - 1] == other[0]{
+					return [neighbor]
 				}
 			}
 		}
 	} else {
-		if coo[n - 1] == 0 {
-			next << center
-		} else if coo[n - 1] == center {
-			next_final_nei := remove_from_base(triabase, [0, center])
-
-			if nei.len == 2 {
-				// in this case there is only one of the two neighbors which is closer to the center of gravity
-				for elem in nei {
-					if elem[n - 1] == next_final_nei[0] || elem[n - 1] == next_final_nei[1] {
-						next = elem.clone()
-						break
-					}
+		if coo[n - 1] == center{
+			for neighbor in nei{
+				mut next := [][]int{}
+				if neighbor[n - 1] != 0{
+					next << [neighbor]
 				}
-			} else {
-				mut final_co := 0
-				if rand.bernoulli(0.5) or { false } {
-					final_co = next_final_nei[0]
-				} else {
-					final_co = next_final_nei[1]
-				}
-
-				// used to find the neighbor that end with the desired value
-				for elem in nei {
-					if elem[n - 1] == final_co {
-						next = elem.clone()
-						break
-					}
+				return next
+			}
+		}
+		else if coo[n - 1] == 0 {
+			for neighbor in nei{
+				if neighbor[n - 1] == center{
+					return [neighbor]
 				}
 			}
-		} else {
-			next << 0
+		}
+		else{
+			for neighbor in nei{
+				if neighbor[n - 1] == 0{
+					return [neighbor]
+				}
+			}
 		}
 	}
 
-	return next
+	return [coo]
 }
 
 // DIVIDE & MERGE:

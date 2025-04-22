@@ -412,50 +412,46 @@ fn gravity(coo []int, center int) [][]int {
 
 	nei := neighbors(coo)
 	if is_reverse {
-		if coo[n - 1] == center{
-			for neighbor in nei{
-				if neighbor[n - 1] == 0{
+		if coo[n - 1] == center {
+			for neighbor in nei {
+				if neighbor[n - 1] == 0 {
 					return [neighbor]
 				}
 			}
-		}
-		else if coo[n - 1] == 0 {
-			for neighbor in nei{
+		} else if coo[n - 1] == 0 {
+			for neighbor in nei {
 				mut next := [][]int{}
-				if neighbor[n - 1] != center{
+				if neighbor[n - 1] != center {
 					next << [neighbor]
 				}
 				return next
 			}
-		}
-		else{
-			other := remove_from_base([1, 2, 3], [center, coo[n-1]])
-			for neighbor in nei{
-				if neighbor[n - 1] == other[0]{
+		} else {
+			other := remove_from_base([1, 2, 3], [center, coo[n - 1]])
+			for neighbor in nei {
+				if neighbor[n - 1] == other[0] {
 					return [neighbor]
 				}
 			}
 		}
 	} else {
-		if coo[n - 1] == center{
-			for neighbor in nei{
+		if coo[n - 1] == center {
+			for neighbor in nei {
 				mut next := [][]int{}
-				if neighbor[n - 1] != 0{
+				if neighbor[n - 1] != 0 {
 					next << [neighbor]
 				}
 				return next
 			}
-		}
-		else if coo[n - 1] == 0 {
-			for neighbor in nei{
-				if neighbor[n - 1] == center{
+		} else if coo[n - 1] == 0 {
+			for neighbor in nei {
+				if neighbor[n - 1] == center {
 					return [neighbor]
 				}
 			}
-		}
-		else{
-			for neighbor in nei{
-				if neighbor[n - 1] == 0{
+		} else {
+			for neighbor in nei {
+				if neighbor[n - 1] == 0 {
 					return [neighbor]
 				}
 			}

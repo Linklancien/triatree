@@ -1,6 +1,7 @@
 module main
 
 import math.vec { vec2 }
+import math
 import gg
 
 const bg_color = gg.Color{0, 0, 0, 255}
@@ -31,6 +32,7 @@ fn main() {
 	app.carte = Hexa_world{
 		world: []Triatree_Ensemble{len: 6, init: Triatree_Ensemble{
 			liste_tree: []Triatree{len: 1, init: Triatree{
+				const_velocity:	f32(60*math.pow(2, 8))
 				compo:     Elements.wood
 				id:        index
 				dimension: 8
@@ -38,11 +40,13 @@ fn main() {
 			}}
 		}}
 	}
-	for _ in 0 .. 3 {
+	for _ in 0 .. 1 {
 		app.carte.divide_rec()
 	}
 
 	app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1] =  Triatree{
+		const_velocity:	 app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1].const_velocity
+		velocity:  100
 		compo:     Elements.stone
 		id:        app.carte.world[0].liste_tree.len - 1
 		dimension: app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1].dimension

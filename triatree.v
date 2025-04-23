@@ -487,14 +487,20 @@ fn (mut parent Triatree_Ensemble) gravity_update () {
 fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 	match mut tree.compo {
 		Elements {
-			tree.count += 1
-			possible := gravity(tree.coo, 1)
-			liste_id := []int{len: possible.len, init: parent.liste_tree[0].go_to(possible[index], parent)}
-			checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
-			for i in 0 .. checked.len {
-				if checked[i] {
-					parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
-					break
+			if tree.velocity != 0{
+				tree.count += 1
+				println('$tree.count $tree.velocity $tree.const_velocity > ${tree.velocity * tree.count}')
+				possible := gravity(tree.coo, 1)
+				liste_id := []int{len: possible.len, init: parent.liste_tree[0].go_to(possible[index], parent)}
+				checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
+				for i in 0 .. checked.len {
+					if checked[i] {
+						println("Changee")
+						tree.velocity += 1
+						tree.count = 0
+						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
+						break
+					}
 				}
 			}
 		}
@@ -513,7 +519,7 @@ fn (tree Triatree) check_gravity(other Triatree) bool {
 		return false
 	}
 	// not the right time to update
-	if tree.const_velocity != tree.velocity * tree.count {
+	if tree.const_velocity > tree.velocity * tree.count {
 		return false
 	}
 	// don't change if the other is solid
@@ -554,11 +560,12 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 				for new in 0 .. 4 {
 					mut next_coo := tree.coo.clone()
 					next_coo << [new]
-
+					const_velocity := f32(60*math.pow(2, (tree.dimension - 1)))
 					mut id := -1
 					if parent.free_index.len != 0 {
 						id = parent.free_index.pop()
 						parent.liste_tree[id] = Triatree{
+							const_velocity:	const_velocity
 							compo:     tree.compo
 							id:        id
 							dimension: (tree.dimension - 1)
@@ -568,6 +575,7 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 						id = parent.liste_tree.len
 						parent.liste_tree << [
 							Triatree{
+								const_velocity:	const_velocity
 								compo:     tree.compo
 								id:        id
 								dimension: (tree.dimension - 1)

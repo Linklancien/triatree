@@ -10,16 +10,24 @@ const center = vec2[f32](f32(0), f32(0))
 enum Elements {
 	// element is a key of the elements_caras map
 	wood
+	stone
 }
 
 const elements_caras = {
-	Elements.wood: Cara{
-		color: gg.Color{125, 125, 125, 255}
+	Elements.wood:  Cara{
+		density: 10
+		color:   gg.Color{153, 76, 0, 255}
+	}
+	Elements.stone: Cara{
+		density: 100
+		color:   gg.Color{125, 125, 125, 255}
 	}
 }
 
 struct Cara {
 	// quantitées intensives
+	density f32
+
 	color gg.Color
 }
 
@@ -37,6 +45,7 @@ mut:
 }
 
 struct Triatree {
+	const_velocity f32 // 60*2^n
 mut:
 	compo Self
 
@@ -45,6 +54,10 @@ mut:
 
 	// entre dimensions_max et 0
 	coo []int
+
+	is_solid bool // !is_fluid
+	count    int
+	velocity f32
 }
 
 struct Childs {
@@ -459,6 +472,74 @@ fn gravity(coo []int, center int) [][]int {
 	}
 
 	return [coo]
+}
+
+fn (mut hexa_world Hexa_world) gravity_update () {
+	for mut parent in hexa_world.world{
+		parent.gravity_update()
+	}
+}
+
+fn (mut parent Triatree_Ensemble) gravity_update () {
+	parent.liste_tree[0].gravity_update(mut parent)
+}
+ 
+fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
+	match mut tree.compo {
+		Elements {
+			tree.count += 1
+			possible := gravity(tree.coo, 1)
+			liste_id := []int{len: possible.len, init: parent.liste_tree[0].go_to(possible[index], parent)}
+			checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
+			for i in 0 .. checked.len {
+				if checked[i] {
+					parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
+					break
+				}
+			}
+		}
+		Childs {
+			parent.liste_tree[tree.compo.up].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.mid].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.left].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.right].gravity_update(mut parent)
+		}
+	}
+}
+
+fn (tree Triatree) check_gravity(other Triatree) bool {
+	// no need to change if the other is the same
+	if tree.compo == other.compo {
+		return false
+	}
+	// not the right time to update
+	if tree.const_velocity != tree.velocity * tree.count {
+		return false
+	}
+	// don't change if the other is solid
+	if other.is_solid {
+		return false
+	}
+	// don't change if the density is less then the other density
+	match tree.compo{
+		Elements{
+			match other.compo{
+				Elements{
+					if elements_caras[tree.compo].density < elements_caras[other.compo].density {
+						return false
+					}
+				}else{/*hummmmmm and if*/}
+			}
+		} else{}
+	}
+
+	return true
+}
+
+fn (mut parent Triatree_Ensemble) exchange(tree1_id int, tree2_id int) {
+	tree_copy := parent.liste_tree[tree2_id]
+	parent.liste_tree[tree2_id] = parent.liste_tree[tree1_id]
+	parent.liste_tree[tree1_id] = tree_copy
 }
 
 // DIVIDE & MERGE:

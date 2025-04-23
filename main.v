@@ -42,6 +42,13 @@ fn main() {
 		app.carte.divide_rec()
 	}
 
+	app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1] =  Triatree{
+		compo:     Elements.stone
+		id:        app.carte.world[0].liste_tree.len - 1
+		dimension: app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1].dimension
+		coo:       app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1].coo
+	}
+
 	app.ctx.run()
 }
 
@@ -51,6 +58,8 @@ fn on_frame(mut app App) {
 	// clear
 	app.ctx.begin()
 	app.ctx.end()
+
+	app.carte.gravity_update()
 
 	screen_center := vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2))
 	app.carte.draw(screen_center, 0, 1, 1, app.ctx)

@@ -487,7 +487,7 @@ fn (mut parent Triatree_Ensemble) gravity_update() {
 	parent.liste_tree[0].gravity_update(mut parent)
 }
 
-fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) int {
+fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 	match mut tree.compo {
 		Elements {
 			if tree.velocity != 0 {
@@ -502,20 +502,18 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) int {
 						println('Changee')
 						tree.velocity += 1
 						tree.count = 0
-						return parent.liste_tree[liste_id[i]].id
+						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
 					}
 				}
 			}
 		}
 		Childs {
-			parent.exchange(parent.liste_tree[tree.compo.up].id, parent.liste_tree[tree.compo.up].gravity_update(mut parent))
-			parent.exchange(parent.liste_tree[tree.compo.mid].id, parent.liste_tree[tree.compo.mid].gravity_update(mut parent))
-			parent.exchange(parent.liste_tree[tree.compo.left].id, parent.liste_tree[tree.compo.left].gravity_update(mut parent))
-			parent.exchange(parent.liste_tree[tree.compo.right].id, parent.liste_tree[tree.compo.right].gravity_update(mut parent))
+			parent.liste_tree[tree.compo.up].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.mid].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.left].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.right].gravity_update(mut parent)
 		}
 	}
-
-	return tree.id
 }
 
 fn (tree Triatree) check_gravity(other Triatree) bool {
@@ -553,6 +551,7 @@ fn (tree Triatree) check_gravity(other Triatree) bool {
 }
 
 fn (mut parent Triatree_Ensemble) exchange(tree1_id int, tree2_id int) {
+	println("A")
 	tree_copy := Triatree{
 		const_velocity: parent.liste_tree[tree2_id].const_velocity
 		compo:          parent.liste_tree[tree2_id].compo

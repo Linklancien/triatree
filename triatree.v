@@ -28,7 +28,8 @@ type Self = Elements | Childs
 
 struct Triatree_Ensemble {
 mut:
-	free_index []int // len%4 == 0 always ?
+	free_index []int
+	// len%4 == 0 always ?
 	liste_tree []Triatree
 }
 
@@ -480,13 +481,12 @@ fn gravity(coo []int, center int) []int {
 }
 
 // CHANGE ELEMENTS
-
-fn (mut tree Triatree) change_elements(new_element Elements, mut parent Triatree_Ensemble){
-	match mut tree.compo{
-		Elements{
+fn (mut tree Triatree) change_elements(new_element Elements, mut parent Triatree_Ensemble) {
+	match mut tree.compo {
+		Elements {
 			tree.compo = new_element
 		}
-		Childs{
+		Childs {
 			parent.liste_tree[tree.compo.mid].change_elements(new_element, mut parent)
 			parent.liste_tree[tree.compo.up].change_elements(new_element, mut parent)
 			parent.liste_tree[tree.compo.left].change_elements(new_element, mut parent)
@@ -495,7 +495,7 @@ fn (mut tree Triatree) change_elements(new_element Elements, mut parent Triatree
 	}
 }
 
-fn (mut parent Triatree_Ensemble) change_elements(new_element Elements, id int){
+fn (mut parent Triatree_Ensemble) change_elements(new_element Elements, id int) {
 	parent.liste_tree[id].change_elements(new_element, mut parent)
 }
 

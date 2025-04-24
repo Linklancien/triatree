@@ -13,8 +13,8 @@ mut:
 
 	carte Hexa_world
 
-	// 
-	view_pos Vec2[f32]
+	//
+	view_pos    Vec2[f32]
 	zomm_factor f32 = 1
 }
 
@@ -63,27 +63,27 @@ fn on_frame(mut app App) {
 }
 
 fn on_event(e &gg.Event, mut app App) {
-	match e.key_code{
-		.up{
+	match e.key_code {
+		.up {
 			app.view_pos += vec2[f32](f32(0), f32(mouv))
 		}
-		.down{
+		.down {
 			app.view_pos += vec2[f32](f32(0), f32(-mouv))
 		}
-		.left{
+		.left {
 			app.view_pos += vec2[f32](f32(-mouv), f32(0))
 		}
-		.right{
+		.right {
 			app.view_pos += vec2[f32](f32(mouv), f32(0))
 		}
-		.page_up{
+		.page_up {
 			app.zomm_factor += zoom_const
 		}
-		.page_down{
-			if app.zomm_factor != 1{
+		.page_down {
+			if app.zomm_factor != 1 {
 				app.zomm_factor -= zoom_const
 			}
 		}
-		else{}
+		else {}
 	}
 }

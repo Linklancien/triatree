@@ -211,6 +211,7 @@ fn test_hexa_world_neighbors() {
 fn test_gravity() {
 	println('--------------------')
 	println('test_gravity():')
+
 	print('test 1 special case: ')
 	assert gravity([0], 1) == [1], 'assertion failed for specific: [0]'
 	assert gravity([1], 1) == [1], 'assertion failed for specific: [1]'
@@ -288,6 +289,24 @@ fn test_gravity() {
 			}
 		}
 	}
+	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
+fn test_change_elements() {
+	println('--------------------')
+	println('test_change_elements():')
+	mut tree := Triatree{
+		compo:     Elements.wood
+		id:        index
+		dimension: 8
+		coo:       []
+	}
+
+	print('test 1 special case: ')
+
 	println('success')
 
 	println('Passed')

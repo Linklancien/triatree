@@ -50,9 +50,9 @@ fn main() {
 		app.carte.divide_rec()
 	}
 
-	ids := [app.carte.world[0].liste_tree.len - 1, 56]
+	ids := [app.carte.world[0].liste_tree.len - 1, 56, 12, 42, app.carte.world[0].liste_tree.len - 10]
 	mut elem := Elements.wood
-	for id in ids{
+	for id in ids {
 		app.carte.world[0].liste_tree[id] = Triatree{
 			const_velocity: app.carte.world[0].liste_tree[id].const_velocity
 			velocity:       0
@@ -61,10 +61,9 @@ fn main() {
 			dimension:      app.carte.world[0].liste_tree[id].dimension
 			coo:            app.carte.world[0].liste_tree[id].coo
 		}
-		if elem == Elements.wood{
+		if elem == Elements.wood {
 			elem = Elements.stone
-		}
-		else{
+		} else {
 			elem = Elements.wood
 		}
 	}

@@ -566,16 +566,15 @@ fn (tree Triatree) check_gravity(other Triatree) bool {
 }
 
 fn (mut parent Triatree_Ensemble) exchange(tree1_id int, tree2_id int) {
-	
 	coo1 := parent.liste_tree[tree1_id].coo
 	coo2 := parent.liste_tree[tree2_id].coo
 
-	parent.liste_tree[tree1_id].coo = coo2
-	parent.liste_tree[tree2_id].coo = coo1
+	parent.liste_tree[tree1_id].change_coo(coo2, mut parent)
+	parent.liste_tree[tree2_id].change_coo(coo1, mut parent)
 
 	n := coo1.len
-	parent.liste_tree[parent.go_to(coo1[..(n - 1)])].change_child(coo1[n-1], tree2_id)
-	parent.liste_tree[parent.go_to(coo2[..(n - 1)])].change_child(coo2[n-1], tree1_id)
+	parent.liste_tree[parent.go_to(coo1[..(n - 1)])].change_child(coo1[n - 1], tree2_id)
+	parent.liste_tree[parent.go_to(coo2[..(n - 1)])].change_child(coo2[n - 1], tree1_id)
 }
 
 fn (mut triatree Triatree) change_child(end_coo int, id int) {
@@ -595,6 +594,40 @@ fn (mut triatree Triatree) change_child(end_coo int, id int) {
 					triatree.compo.right = id
 				}
 				else {}
+			}
+		}
+		else {}
+	}
+}
+
+fn (mut triatree Triatree) change_coo(new_coo []int, mut parent Triatree_Ensemble) {
+	triatree.coo = new_coo
+	match mut triatree.compo {
+		Childs {
+			for i in 0 .. 4 {
+				match i {
+					0 {
+						mut coo := new_coo.clone()
+						coo << [0]
+						parent.liste_tree[triatree.compo.mid].change_coo(coo, mut parent)
+					}
+					1 {
+						mut coo := new_coo.clone()
+						coo << [1]
+						parent.liste_tree[triatree.compo.up].change_coo(coo, mut parent)
+					}
+					2 {
+						mut coo := new_coo.clone()
+						coo << [2]
+						parent.liste_tree[triatree.compo.left].change_coo(coo, mut parent)
+					}
+					3 {
+						mut coo := new_coo.clone()
+						coo << [3]
+						parent.liste_tree[triatree.compo.right].change_coo(coo, mut parent)
+					}
+					else {}
+				}
 			}
 		}
 		else {}

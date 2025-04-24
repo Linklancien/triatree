@@ -479,6 +479,26 @@ fn gravity(coo []int, center int) []int {
 	return next
 }
 
+// CHANGE ELEMENTS
+
+fn (mut tree Triatree) change_elements(new_element Elements, mut parent Triatree_Ensemble){
+	match mut tree.compo{
+		Elements{
+			tree.compo = new_element
+		}
+		Childs{
+			parent.liste_tree[tree.compo.mid].change_elements(new_element, mut parent)
+			parent.liste_tree[tree.compo.up].change_elements(new_element, mut parent)
+			parent.liste_tree[tree.compo.left].change_elements(new_element, mut parent)
+			parent.liste_tree[tree.compo.right].change_elements(new_element, mut parent)
+		}
+	}
+}
+
+fn (mut parent Triatree_Ensemble) change_elements(new_element Elements, id int){
+	parent.liste_tree[id].change_elements(new_element, mut parent)
+}
+
 // DIVIDE & MERGE:
 // DIVIDE:
 

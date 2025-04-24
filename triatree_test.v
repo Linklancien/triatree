@@ -309,18 +309,18 @@ fn test_change_elements() {
 
 	print('test 1 special case: ')
 	tria_ensemble.liste_tree[0].change_elements(Elements.stone, mut tria_ensemble)
-	match tria_ensemble.liste_tree[0].compo{
-		Elements{
+	match tria_ensemble.liste_tree[0].compo {
+		Elements {
 			assert tria_ensemble.liste_tree[0].compo == Elements.stone
 		}
-		else{}
+		else {}
 	}
 	tria_ensemble.liste_tree[0].change_elements(Elements.water, mut tria_ensemble)
-	match tria_ensemble.liste_tree[0].compo{
-		Elements{
+	match tria_ensemble.liste_tree[0].compo {
+		Elements {
 			assert tria_ensemble.liste_tree[0].compo == Elements.water
 		}
-		else{}
+		else {}
 	}
 	println('success')
 
@@ -333,23 +333,24 @@ fn test_change_elements() {
 		}}
 	}
 	tria_ensemble.liste_tree[0].divide(mut tria_ensemble)
-	
+
 	print('test 2 recursiv: ')
 	tria_ensemble.liste_tree[0].change_elements(Elements.stone, mut tria_ensemble)
-	
-	match tria_ensemble.liste_tree[0].compo{
-		Childs{
-			indexs := [tria_ensemble.liste_tree[0].compo.mid, tria_ensemble.liste_tree[0].compo.up, tria_ensemble.liste_tree[0].compo.left, tria_ensemble.liste_tree[0].compo.right]
-			for index in indexs{
-				match tria_ensemble.liste_tree[index].compo{
-					Elements{
+
+	match tria_ensemble.liste_tree[0].compo {
+		Childs {
+			indexs := [tria_ensemble.liste_tree[0].compo.mid, tria_ensemble.liste_tree[0].compo.up,
+				tria_ensemble.liste_tree[0].compo.left, tria_ensemble.liste_tree[0].compo.right]
+			for index in indexs {
+				match tria_ensemble.liste_tree[index].compo {
+					Elements {
 						assert tria_ensemble.liste_tree[index].compo == Elements.stone
 					}
-					else{}
+					else {}
 				}
 			}
 		}
-		else{}
+		else {}
 	}
 	println('success')
 

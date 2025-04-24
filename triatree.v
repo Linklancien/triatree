@@ -42,6 +42,7 @@ type Self = Elements | Childs
 struct Triatree_Ensemble {
 mut:
 	free_index []int
+
 	// len%4 == 0 always ?
 	liste_tree []Triatree
 }

@@ -40,7 +40,7 @@ fn main() {
 			}}
 		}}
 	}
-	for _ in 0 .. 1 {
+	for _ in 0 .. 3 {
 		app.carte.divide_rec()
 	}
 

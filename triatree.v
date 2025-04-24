@@ -42,6 +42,7 @@ type Self = Elements | Childs
 struct Triatree_Ensemble {
 mut:
 	free_index []int
+
 	// len%4 == 0 always ?
 	liste_tree []Triatree
 }
@@ -64,6 +65,7 @@ mut:
 	coo []int
 
 	is_solid bool
+
 	// !is_fluid
 	count    int
 	velocity f32
@@ -497,11 +499,13 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 	match mut tree.compo {
 		Elements {
 			tree.count += 1
+
 			// println('${tree.count} ${tree.velocity} ${tree.const_velocity} > ${tree.velocity * tree.count}')
 			possible := gravity(tree.coo, 1)
 			liste_id := []int{len: possible.len, init: parent.liste_tree[0].go_to(possible[index],
 				parent)}
 			checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
+
 			// mut is_no_mouvement := true
 			for i in 0 .. checked.len {
 				if checked[i] {
@@ -509,10 +513,10 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 						tree.velocity += acceleration
 						tree.count = 0
 						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
+
 						// is_no_mouvement = false
 						break
-					}
-					else if tree.velocity == 0{
+					} else if tree.velocity == 0 {
 						tree.velocity += acceleration
 					}
 				}
@@ -536,8 +540,6 @@ fn (tree Triatree) check_gravity(other Triatree) bool {
 	if tree.compo == other.compo {
 		return false
 	}
-
-	
 
 	// don't change if the other is solid
 	if other.is_solid {
@@ -569,29 +571,32 @@ fn (mut parent Triatree_Ensemble) exchange(tree1_id int, tree2_id int) {
 	parent.liste_tree[tree1_id].coo = coo2
 	parent.liste_tree[tree2_id].coo = coo1
 
-	parent.liste_tree[parent.liste_tree[0].go_to(coo1, parent)].change_child(coo1[coo1.len - 1], tree2_id)
-	parent.liste_tree[parent.liste_tree[0].go_to(coo2, parent)].change_child(coo2[coo1.len - 1], tree1_id)
+	parent.liste_tree[parent.liste_tree[0].go_to(coo1, parent)].change_child(coo1[coo1.len - 1],
+		tree2_id)
+	parent.liste_tree[parent.liste_tree[0].go_to(coo2, parent)].change_child(coo2[coo1.len - 1],
+		tree1_id)
 }
 
-fn (mut triatree Triatree) change_child(coo int, id int){
-	match mut triatree.compo{
-		Childs{
-			match coo{
-				0{
+fn (mut triatree Triatree) change_child(coo int, id int) {
+	match mut triatree.compo {
+		Childs {
+			match coo {
+				0 {
 					triatree.compo.mid = id
 				}
-				1{
+				1 {
 					triatree.compo.up = id
 				}
-				2{
+				2 {
 					triatree.compo.left = id
 				}
-				3{
+				3 {
 					triatree.compo.right = id
-				}else{}
+				}
+				else {}
 			}
 		}
-		else{}
+		else {}
 	}
 }
 

@@ -11,16 +11,29 @@ const center = vec2[f32](f32(0), f32(0))
 enum Elements {
 	// element is a key of the elements_caras map
 	wood
+	stone
+	water
 }
 
 const elements_caras = {
-	Elements.wood: Cara{
-		color: gg.Color{125, 125, 125, 255}
+	Elements.wood:  Cara{
+		density: 10
+		color:   gg.Color{153, 76, 0, 255}
+	}
+	Elements.stone: Cara{
+		density: 100
+		color:   gg.Color{125, 125, 125, 255}
+	}
+	Elements.water: Cara{
+		density: 1
+		color:   gg.Color{0, 0, 204, 255}
 	}
 }
 
 struct Cara {
 	// quantitées intensives
+	density f32
+
 	color gg.Color
 }
 

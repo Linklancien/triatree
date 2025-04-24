@@ -11,16 +11,29 @@ const center = vec2[f32](f32(0), f32(0))
 enum Elements {
 	// element is a key of the elements_caras map
 	wood
+	stone
+	water
 }
 
 const elements_caras = {
-	Elements.wood: Cara{
-		color: gg.Color{125, 125, 125, 255}
+	Elements.wood:  Cara{
+		density: 10
+		color:   gg.Color{153, 76, 0, 255}
+	}
+	Elements.stone: Cara{
+		density: 100
+		color:   gg.Color{125, 125, 125, 255}
+	}
+	Elements.water: Cara{
+		density: 1
+		color:   gg.Color{0, 0, 204, 255}
 	}
 }
 
 struct Cara {
 	// quantitées intensives
+	density f32
+
 	color gg.Color
 }
 
@@ -28,7 +41,9 @@ type Self = Elements | Childs
 
 struct Triatree_Ensemble {
 mut:
-	free_index []int // len%4 == 0 always ?
+	free_index []int
+
+	// len%4 == 0 always ?
 	liste_tree []Triatree
 }
 
@@ -298,11 +313,11 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 }
 
 // graphics:
-fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, parent Triatree_Ensemble, ctx gg.Context) {
+fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, parent Triatree_Ensemble, ctx gg.Context) {
 	match tree.compo {
 		Elements {
 			pos := pos_center + (coo_tria_to_cart(tree.coo, rota, tree.dimension +
-				tree.coo.len)).mul_scalar(zomm_factor)
+				tree.coo.len)).mul_scalar(zoom_factor)
 			mut angle := -rota - math.pi / 6
 
 			mut is_reverse := false
@@ -315,42 +330,42 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, parent 
 			if is_reverse {
 				angle += math.pi
 			}
-			size := f32(zomm_factor * math.pow(2, tree.dimension) / math.sqrt(3)) - 1
+			size := f32(zoom_factor * math.pow(2, tree.dimension) / math.sqrt(3)) - 1
 			ctx.begin()
 			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
 				elements_caras[tree.compo].color)
 			ctx.end(how: .passthru)
 		}
 		Childs {
-			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zomm_factor, parent,
+			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zoom_factor, parent,
 				ctx)
-			parent.liste_tree[tree.compo.up].draw(pos_center, rota, zomm_factor, parent,
+			parent.liste_tree[tree.compo.up].draw(pos_center, rota, zoom_factor, parent,
 				ctx)
-			parent.liste_tree[tree.compo.left].draw(pos_center, rota, zomm_factor, parent,
+			parent.liste_tree[tree.compo.left].draw(pos_center, rota, zoom_factor, parent,
 				ctx)
-			parent.liste_tree[tree.compo.right].draw(pos_center, rota, zomm_factor, parent,
+			parent.liste_tree[tree.compo.right].draw(pos_center, rota, zoom_factor, parent,
 				ctx)
 		}
 	}
 }
 
-fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, ctx gg.Context) {
+fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, ctx gg.Context) {
 	if tria_ensemble.liste_tree.len != 0 {
-		tria_ensemble.liste_tree[0].draw(pos_center, rota, zomm_factor, tria_ensemble,
+		tria_ensemble.liste_tree[0].draw(pos_center, rota, zoom_factor, tria_ensemble,
 			ctx)
 	}
 }
 
-fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zomm_factor f32, current int, ctx gg.Context) {
+fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, current int, ctx gg.Context) {
 	for i in 0 .. 6 {
 		if hexa_world.world[i].liste_tree.len != 0 {
 			angle := rota + (i - f32(current)) * math.pi / 3
 
 			dim := hexa_world.world[i].liste_tree[0].dimension
-			dist := f32(math.pow(2, dim) / math.sqrt(3))
+			dist := f32(math.pow(2, dim) / math.sqrt(3) * zoom_factor)
 			pos := pos_center + (vec2[f32](0, dist)).rotate_around_ccw(center, angle)
 
-			hexa_world.world[i].draw(pos, angle, zomm_factor, ctx)
+			hexa_world.world[i].draw(pos, angle, zoom_factor, ctx)
 		}
 	}
 }
@@ -477,6 +492,25 @@ fn gravity(coo []int, center int) []int {
 	}
 
 	return next
+}
+
+// CHANGE ELEMENTS
+fn (mut tree Triatree) change_elements(new_element Elements, mut parent Triatree_Ensemble) {
+	match mut tree.compo {
+		Elements {
+			tree.compo = new_element
+		}
+		Childs {
+			parent.liste_tree[tree.compo.mid].change_elements(new_element, mut parent)
+			parent.liste_tree[tree.compo.up].change_elements(new_element, mut parent)
+			parent.liste_tree[tree.compo.left].change_elements(new_element, mut parent)
+			parent.liste_tree[tree.compo.right].change_elements(new_element, mut parent)
+		}
+	}
+}
+
+fn (mut parent Triatree_Ensemble) change_elements(new_element Elements, id int) {
+	parent.liste_tree[id].change_elements(new_element, mut parent)
 }
 
 // DIVIDE & MERGE:

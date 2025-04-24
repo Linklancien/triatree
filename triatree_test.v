@@ -211,6 +211,7 @@ fn test_hexa_world_neighbors() {
 fn test_gravity() {
 	println('--------------------')
 	println('test_gravity():')
+
 	print('test 1 special case: ')
 	assert gravity([0], 1) == [[1]], 'assertion failed for specific: [0]'
 	assert gravity([1], 1) == [[1]], 'assertion failed for specific: [1]'
@@ -264,6 +265,69 @@ fn test_gravity() {
 				}
 			}
 		}
+	}
+	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
+fn test_change_elements() {
+	println('--------------------')
+	println('test_change_elements():')
+	mut tria_ensemble := Triatree_Ensemble{
+		liste_tree: []Triatree{len: 1, init: Triatree{
+			compo:     Elements.wood
+			id:        index
+			dimension: 8
+			coo:       []
+		}}
+	}
+
+	print('test 1 special case: ')
+	tria_ensemble.liste_tree[0].change_elements(Elements.stone, mut tria_ensemble)
+	match tria_ensemble.liste_tree[0].compo {
+		Elements {
+			assert tria_ensemble.liste_tree[0].compo == Elements.stone
+		}
+		else {}
+	}
+	tria_ensemble.liste_tree[0].change_elements(Elements.water, mut tria_ensemble)
+	match tria_ensemble.liste_tree[0].compo {
+		Elements {
+			assert tria_ensemble.liste_tree[0].compo == Elements.water
+		}
+		else {}
+	}
+	println('success')
+
+	tria_ensemble = Triatree_Ensemble{
+		liste_tree: []Triatree{len: 1, init: Triatree{
+			compo:     Elements.wood
+			id:        index
+			dimension: 8
+			coo:       []
+		}}
+	}
+	tria_ensemble.liste_tree[0].divide(mut tria_ensemble)
+
+	print('test 2 recursiv: ')
+	tria_ensemble.liste_tree[0].change_elements(Elements.stone, mut tria_ensemble)
+
+	match tria_ensemble.liste_tree[0].compo {
+		Childs {
+			indexs := [tria_ensemble.liste_tree[0].compo.mid, tria_ensemble.liste_tree[0].compo.up,
+				tria_ensemble.liste_tree[0].compo.left, tria_ensemble.liste_tree[0].compo.right]
+			for index in indexs {
+				match tria_ensemble.liste_tree[index].compo {
+					Elements {
+						assert tria_ensemble.liste_tree[index].compo == Elements.stone
+					}
+					else {}
+				}
+			}
+		}
+		else {}
 	}
 	println('success')
 

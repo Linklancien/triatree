@@ -5,12 +5,18 @@ import math
 import gg
 
 const bg_color = gg.Color{0, 0, 0, 255}
+const mouv = 10
+const zoom_const = 0.1
 
 struct App {
 mut:
 	ctx &gg.Context = unsafe { nil }
 
 	carte Hexa_world
+
+	//
+	view_pos    Vec2[f32]
+	zomm_factor f32 = 1
 }
 
 fn main() {
@@ -74,9 +80,34 @@ fn on_frame(mut app App) {
 
 	app.carte.gravity_update()
 
-	screen_center := vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2))
-	app.carte.draw(screen_center, 0, 1, 1, app.ctx)
-	app.ctx.draw_circle_filled(f32(400), f32(400), f32(2), bg_color)
+	app.carte.gravity_update()
+
+	screen_center := vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2)) + app.view_pos
+	app.carte.draw(screen_center, 0, app.zomm_factor, 1, app.ctx)
 }
 
-fn on_event(e &gg.Event, mut app App) {}
+fn on_event(e &gg.Event, mut app App) {
+	match e.key_code {
+		.up {
+			app.view_pos += vec2[f32](f32(0), f32(mouv))
+		}
+		.down {
+			app.view_pos += vec2[f32](f32(0), f32(-mouv))
+		}
+		.left {
+			app.view_pos += vec2[f32](f32(-mouv), f32(0))
+		}
+		.right {
+			app.view_pos += vec2[f32](f32(mouv), f32(0))
+		}
+		.page_up {
+			app.zomm_factor += zoom_const
+		}
+		.page_down {
+			if app.zomm_factor != 1 {
+				app.zomm_factor -= zoom_const
+			}
+		}
+		else {}
+	}
+}

@@ -53,6 +53,15 @@ fn main() {
 		coo:            app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1].coo
 	}
 
+	app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 20] = Triatree{
+		const_velocity: app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 20].const_velocity
+		velocity:       0
+		compo:          Elements.stone
+		id:             app.carte.world[0].liste_tree.len - 20
+		dimension:      app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 20].dimension
+		coo:            app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 20].coo
+	}
+
 	app.ctx.run()
 }
 

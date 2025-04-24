@@ -6,7 +6,7 @@ import gg
 
 const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
-const acceleration = 100
+const acceleration = 50
 
 enum Elements {
 	// element is a key of the elements_caras map
@@ -379,20 +379,20 @@ fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zoom_factor f32,
 }
 
 // find
-fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) int {
-	if coo == tree.coo {
+fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble, index int) int {
+	if tree.coo == coo {
 		return tree.id
 	}
 	match tree.compo {
 		Childs {
-			if coo[0] == 0 {
-				return parent.liste_tree[tree.compo.mid].go_to(coo[1..], parent)
-			} else if coo[0] == 1 {
-				return parent.liste_tree[tree.compo.up].go_to(coo[1..], parent)
-			} else if coo[0] == 2 {
-				return parent.liste_tree[tree.compo.left].go_to(coo[1..], parent)
-			} else if coo[0] == 3 {
-				return parent.liste_tree[tree.compo.right].go_to(coo[1..], parent)
+			if coo[index] == 0 {
+				return parent.liste_tree[tree.compo.mid].go_to(coo, parent, index + 1)
+			} else if coo[index] == 1 {
+				return parent.liste_tree[tree.compo.up].go_to(coo, parent, index + 1)
+			} else if coo[index] == 2 {
+				return parent.liste_tree[tree.compo.left].go_to(coo, parent, index + 1)
+			} else if coo[index] == 3 {
+				return parent.liste_tree[tree.compo.right].go_to(coo, parent, index + 1)
 			}
 		}
 		Elements {
@@ -405,7 +405,7 @@ fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) int {
 }
 
 fn (parent Triatree_Ensemble) go_to(coo []int) int {
-	return parent.liste_tree[0].go_to(coo, parent)
+	return parent.liste_tree[0].go_to(coo, parent, 0)
 }
 
 // PHYSIC:
@@ -515,7 +515,6 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 						tree.velocity += acceleration
 						tree.count = 0
 						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
-
 						// is_no_mouvement = false
 						break
 					} else if tree.velocity == 0 {
@@ -567,20 +566,22 @@ fn (tree Triatree) check_gravity(other Triatree) bool {
 }
 
 fn (mut parent Triatree_Ensemble) exchange(tree1_id int, tree2_id int) {
+	
 	coo1 := parent.liste_tree[tree1_id].coo
 	coo2 := parent.liste_tree[tree2_id].coo
 
 	parent.liste_tree[tree1_id].coo = coo2
 	parent.liste_tree[tree2_id].coo = coo1
 
-	parent.liste_tree[parent.go_to(coo1)].change_child(coo1[coo1.len - 1], tree2_id)
-	parent.liste_tree[parent.go_to(coo2)].change_child(coo2[coo1.len - 1], tree1_id)
+	n := coo1.len
+	parent.liste_tree[parent.go_to(coo1[..(n - 1)])].change_child(coo1[n-1], tree2_id)
+	parent.liste_tree[parent.go_to(coo2[..(n - 1)])].change_child(coo2[n-1], tree1_id)
 }
 
-fn (mut triatree Triatree) change_child(coo int, id int) {
+fn (mut triatree Triatree) change_child(end_coo int, id int) {
 	match mut triatree.compo {
 		Childs {
-			match coo {
+			match end_coo {
 				0 {
 					triatree.compo.mid = id
 				}

@@ -50,22 +50,23 @@ fn main() {
 		app.carte.divide_rec()
 	}
 
-	app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1] = Triatree{
-		const_velocity: app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1].const_velocity
-		velocity:       0
-		compo:          Elements.stone
-		id:             app.carte.world[0].liste_tree.len - 1
-		dimension:      app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1].dimension
-		coo:            app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 1].coo
-	}
-
-	app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 20] = Triatree{
-		const_velocity: app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 20].const_velocity
-		velocity:       0
-		compo:          Elements.wood
-		id:             app.carte.world[0].liste_tree.len - 20
-		dimension:      app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 20].dimension
-		coo:            app.carte.world[0].liste_tree[app.carte.world[0].liste_tree.len - 20].coo
+	ids := [app.carte.world[0].liste_tree.len - 1, 56]
+	mut elem := Elements.wood
+	for id in ids{
+		app.carte.world[0].liste_tree[id] = Triatree{
+			const_velocity: app.carte.world[0].liste_tree[id].const_velocity
+			velocity:       0
+			compo:          elem
+			id:             id
+			dimension:      app.carte.world[0].liste_tree[id].dimension
+			coo:            app.carte.world[0].liste_tree[id].coo
+		}
+		if elem == Elements.wood{
+			elem = Elements.stone
+		}
+		else{
+			elem = Elements.wood
+		}
 	}
 
 	app.ctx.run()
@@ -77,8 +78,6 @@ fn on_frame(mut app App) {
 	// clear
 	app.ctx.begin()
 	app.ctx.end()
-
-	app.carte.gravity_update()
 
 	app.carte.gravity_update()
 

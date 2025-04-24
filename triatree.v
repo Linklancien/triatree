@@ -54,7 +54,6 @@ mut:
 
 struct Triatree {
 	const_velocity f32
-	// 60*2^n
 mut:
 	compo Self
 
@@ -405,6 +404,10 @@ fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) int {
 	return -1
 }
 
+fn (parent Triatree_Ensemble) go_to(coo []int) int {
+	return parent.liste_tree[0].go_to(coo, parent)
+}
+
 // PHYSIC:
 // TODO: prendre en compte si les case sont occupé lorsque 2 cases peuvent être les suivantes
 // maybe change by adding a new fonction
@@ -502,8 +505,7 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 
 			// println('${tree.count} ${tree.velocity} ${tree.const_velocity} > ${tree.velocity * tree.count}')
 			possible := gravity(tree.coo, 1)
-			liste_id := []int{len: possible.len, init: parent.liste_tree[0].go_to(possible[index],
-				parent)}
+			liste_id := []int{len: possible.len, init: parent.go_to(possible[index])}
 			checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
 
 			// mut is_no_mouvement := true
@@ -571,10 +573,8 @@ fn (mut parent Triatree_Ensemble) exchange(tree1_id int, tree2_id int) {
 	parent.liste_tree[tree1_id].coo = coo2
 	parent.liste_tree[tree2_id].coo = coo1
 
-	parent.liste_tree[parent.liste_tree[0].go_to(coo1, parent)].change_child(coo1[coo1.len - 1],
-		tree2_id)
-	parent.liste_tree[parent.liste_tree[0].go_to(coo2, parent)].change_child(coo2[coo1.len - 1],
-		tree1_id)
+	parent.liste_tree[parent.go_to(coo1)].change_child(coo1[coo1.len - 1], tree2_id)
+	parent.liste_tree[parent.go_to(coo2)].change_child(coo2[coo1.len - 1], tree1_id)
 }
 
 fn (mut triatree Triatree) change_child(coo int, id int) {

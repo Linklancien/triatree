@@ -12,6 +12,7 @@ enum Elements {
 	// element is a key of the elements_caras map
 	wood
 	stone
+	water
 }
 
 const elements_caras = {
@@ -22,6 +23,10 @@ const elements_caras = {
 	Elements.stone: Cara{
 		density: 100
 		color:   gg.Color{125, 125, 125, 255}
+	}
+	Elements.water: Cara{
+		density: 1
+		color:   gg.Color{0, 0, 204, 255}
 	}
 }
 
@@ -491,22 +496,31 @@ fn (mut parent Triatree_Ensemble) gravity_update() {
 fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 	match mut tree.compo {
 		Elements {
-			if tree.velocity != 0 {
-				tree.count += 1
-				// println('${tree.count} ${tree.velocity} ${tree.const_velocity} > ${tree.velocity * tree.count}')
-				possible := gravity(tree.coo, 1)
-				liste_id := []int{len: possible.len, init: parent.liste_tree[0].go_to(possible[index],
-					parent)}
-				checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
-				for i in 0 .. checked.len {
-					if checked[i] {
+			tree.count += 1
+			// println('${tree.count} ${tree.velocity} ${tree.const_velocity} > ${tree.velocity * tree.count}')
+			possible := gravity(tree.coo, 1)
+			liste_id := []int{len: possible.len, init: parent.liste_tree[0].go_to(possible[index],
+				parent)}
+			checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
+			// mut is_no_mouvement := true
+			for i in 0 .. checked.len {
+				if checked[i] {
+					if tree.const_velocity < tree.velocity * tree.count {
 						tree.velocity += acceleration
 						tree.count = 0
 						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
+						// is_no_mouvement = false
 						break
+					}
+					else if tree.velocity == 0{
+						tree.velocity += acceleration
 					}
 				}
 			}
+
+			// if is_no_mouvement{
+			// 	tree.velocity = 0
+			// }
 		}
 		Childs {
 			parent.liste_tree[tree.compo.up].gravity_update(mut parent)
@@ -523,10 +537,7 @@ fn (tree Triatree) check_gravity(other Triatree) bool {
 		return false
 	}
 
-	// not the right time to update
-	if tree.const_velocity > tree.velocity * tree.count {
-		return false
-	}
+	
 
 	// don't change if the other is solid
 	if other.is_solid {

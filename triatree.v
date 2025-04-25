@@ -505,7 +505,7 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 
 			// println('${tree.count} ${tree.velocity} ${tree.const_velocity} > ${tree.velocity * tree.count}')
 			possible := gravity(tree.coo, 1)
-			liste_id := []int{len: possible.len, init: parent.go_to(possible[index])}
+			mut liste_id := []int{len: possible.len, init: parent.go_to(possible[index])}
 			checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
 
 			// mut is_no_mouvement := true
@@ -514,6 +514,10 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 					if tree.const_velocity < tree.velocity * tree.count {
 						tree.velocity += acceleration
 						tree.count = 0
+						for tree.coo.len > parent.liste_tree[liste_id[i]].coo.len {
+							parent.liste_tree[liste_id[i]].divide(mut parent)
+							liste_id[i] = parent.go_to(possible[i])
+						}
 						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
 						// is_no_mouvement = false
 						break
@@ -572,9 +576,10 @@ fn (mut parent Triatree_Ensemble) exchange(tree1_id int, tree2_id int) {
 	parent.liste_tree[tree1_id].change_coo(coo2, mut parent)
 	parent.liste_tree[tree2_id].change_coo(coo1, mut parent)
 
-	n := coo1.len
-	parent.liste_tree[parent.go_to(coo1[..(n - 1)])].change_child(coo1[n - 1], tree2_id)
-	parent.liste_tree[parent.go_to(coo2[..(n - 1)])].change_child(coo2[n - 1], tree1_id)
+	n1 := coo1.len
+	n2 := coo2.len
+	parent.liste_tree[parent.go_to(coo1[..(n1 - 1)])].change_child(coo1[n1 - 1], tree2_id)
+	parent.liste_tree[parent.go_to(coo2[..(n2 - 1)])].change_child(coo2[n2 - 1], tree1_id)
 }
 
 fn (mut triatree Triatree) change_child(end_coo int, id int) {

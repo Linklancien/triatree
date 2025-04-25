@@ -81,7 +81,7 @@ fn on_frame(mut app App) {
 	app.carte.gravity_update()
 
 	screen_center := vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2)) + app.view_pos
-	app.carte.draw(screen_center, 0, app.zomm_factor, 1, app.ctx)
+	app.carte.draw(screen_center, 0, app.zomm_factor, 0, app.ctx)
 }
 
 fn on_event(e &gg.Event, mut app App) {

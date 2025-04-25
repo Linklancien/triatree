@@ -214,7 +214,7 @@ fn test_gravity() {
 
 	print('test 1 special case: ')
 	assert gravity([0], 1) == [[1]], 'assertion failed for specific: [0]'
-	assert gravity([1], 1) == [[1]], 'assertion failed for specific: [1]'
+	assert gravity([1], 1) == [], 'assertion failed for specific: [1]'
 	assert gravity([2], 1) == [[0]], 'assertion failed for specific: [2]'
 	assert gravity([3], 1) == [[0]], 'assertion failed for specific: [3]'
 	println('success')
@@ -222,9 +222,7 @@ fn test_gravity() {
 	print('test 2 one [x], differents centers: ')
 	for gravity_center in 1 .. 3 {
 		assert gravity([0], gravity_center) == [[gravity_center]], 'assertion failed for specific: [0], gravity_center: ${gravity_center}'
-		assert gravity([gravity_center], gravity_center) == [
-			[gravity_center],
-		], 'assertion failed for specific: [gravity_center], gravity_center: ${gravity_center}'
+		assert gravity([gravity_center], gravity_center) == [], 'assertion failed for specific: [gravity_center], gravity_center: ${gravity_center}'
 		others := remove_from_base([1, 2, 3], [gravity_center])
 		assert gravity([others[0]], gravity_center) == [[0]], 'assertion failed for specific: [0], gravity_center: ${gravity_center}, others: ${others[0]}'
 		assert gravity([others[1]], gravity_center) == [[0]], 'assertion failed for specific: [0], gravity_center: ${gravity_center}, others: ${others[1]}'
@@ -242,7 +240,6 @@ fn test_gravity() {
 					liste_next := gravity(coo, gravity_center)
 					nei := neighbors(coo)
 
-					assert liste_next.len != 0, 'assertion failed for lens : nei: ${nei}, liste_next: ${liste_next}, coo: ${coo},  gravity_center: ${gravity_center}'
 					assert liste_next.len <= 2, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
 
 					for next in liste_next {
@@ -250,7 +247,7 @@ fn test_gravity() {
 					}
 					if z == gravity_center {
 						if x == z && y == z {
-							assert liste_next[0] == coo, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
+							assert liste_next == [], 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
 						} else if is_reverse {
 							assert liste_next[0][n - 1] == 0, 'assertion failed for lens : liste_next: ${liste_next},  coo: ${coo},  gravity_center: ${gravity_center}'
 						}

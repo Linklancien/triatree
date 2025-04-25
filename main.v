@@ -52,20 +52,21 @@ fn main() {
 
 	ids := [app.carte.world[0].liste_tree.len - 1, 56, 12, 42, app.carte.world[0].liste_tree.len - 10]
 	mut elem := Elements.wood
-	for id in ids {
-		println(' ${id}, ${app.carte.world[0].liste_tree[id].const_velocity}')
-		app.carte.world[0].liste_tree[id] = Triatree{
-			const_velocity: app.carte.world[0].liste_tree[id].const_velocity
-			velocity:       0
-			compo:          elem
-			id:             id
-			dimension:      app.carte.world[0].liste_tree[id].dimension
-			coo:            app.carte.world[0].liste_tree[id].coo
-		}
-		if elem == Elements.wood {
-			elem = Elements.stone
-		} else {
-			elem = Elements.wood
+	for current in 0..6{
+		for id in ids {
+			app.carte.world[current].liste_tree[id] = Triatree{
+				const_velocity: app.carte.world[current].liste_tree[id].const_velocity
+				velocity:       0
+				compo:          elem
+				id:             id
+				dimension:      app.carte.world[current].liste_tree[id].dimension
+				coo:            app.carte.world[current].liste_tree[id].coo
+			}
+			if elem == Elements.wood {
+				elem = Elements.stone
+			} else {
+				elem = Elements.wood
+			}
 		}
 	}
 

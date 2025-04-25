@@ -53,6 +53,7 @@ fn main() {
 	ids := [app.carte.world[0].liste_tree.len - 1, 56, 12, 42, app.carte.world[0].liste_tree.len - 10]
 	mut elem := Elements.wood
 	for id in ids {
+		println(' ${id}, ${app.carte.world[0].liste_tree[id].const_velocity}')
 		app.carte.world[0].liste_tree[id] = Triatree{
 			const_velocity: app.carte.world[0].liste_tree[id].const_velocity
 			velocity:       0

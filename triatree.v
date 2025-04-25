@@ -680,6 +680,8 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 							id:             id
 							dimension:      (tree.dimension - 1)
 							coo:            next_coo
+							count:          tree.count
+							velocity:       tree.velocity
 						}
 					} else {
 						id = parent.liste_tree.len
@@ -690,21 +692,24 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 								id:             id
 								dimension:      (tree.dimension - 1)
 								coo:            next_coo
+								count:          tree.count
+								velocity:       tree.velocity
 							},
 						]
 					}
 					ids << [id]
 				}
 				parent.liste_tree[tree.id] = Triatree{
-					compo:     Childs{
+					const_velocity: tree.const_velocity
+					compo:          Childs{
 						mid:   ids[0]
 						up:    ids[1]
 						left:  ids[2]
 						right: ids[3]
 					}
-					id:        tree.id
-					dimension: tree.dimension
-					coo:       tree.coo.clone()
+					id:             tree.id
+					dimension:      tree.dimension
+					coo:            tree.coo.clone()
 				}
 			}
 			else {}

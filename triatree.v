@@ -6,7 +6,7 @@ import gg
 
 const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
-const acceleration = 50
+const acceleration = 5
 
 enum Elements {
 	// element is a key of the elements_caras map
@@ -512,7 +512,6 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 			for i in 0 .. checked.len {
 				if checked[i] {
 					if tree.const_velocity < tree.velocity * tree.count {
-						tree.velocity += acceleration
 						tree.count = 0
 						for tree.coo.len > parent.liste_tree[liste_id[i]].coo.len {
 							parent.liste_tree[liste_id[i]].divide(mut parent)
@@ -521,15 +520,11 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
 						// is_no_mouvement = false
 						break
-					} else if tree.velocity == 0 {
-						tree.velocity += acceleration
 					}
 				}
 			}
 
-			// if is_no_mouvement{
-			// 	tree.velocity = 0
-			// }
+			tree.velocity += acceleration
 		}
 		Childs {
 			parent.liste_tree[tree.compo.up].gravity_update(mut parent)
@@ -613,22 +608,22 @@ fn (mut triatree Triatree) change_coo(new_coo []int, mut parent Triatree_Ensembl
 				match i {
 					0 {
 						mut coo := new_coo.clone()
-						coo << [0]
+						coo << 0
 						parent.liste_tree[triatree.compo.mid].change_coo(coo, mut parent)
 					}
 					1 {
 						mut coo := new_coo.clone()
-						coo << [1]
+						coo << 1
 						parent.liste_tree[triatree.compo.up].change_coo(coo, mut parent)
 					}
 					2 {
 						mut coo := new_coo.clone()
-						coo << [2]
+						coo << 2
 						parent.liste_tree[triatree.compo.left].change_coo(coo, mut parent)
 					}
 					3 {
 						mut coo := new_coo.clone()
-						coo << [3]
+						coo << 3
 						parent.liste_tree[triatree.compo.right].change_coo(coo, mut parent)
 					}
 					else {}

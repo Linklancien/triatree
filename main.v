@@ -1,6 +1,7 @@
 module main
 
 import math.vec { Vec2, vec2 }
+import math
 import gg
 
 const bg_color = gg.Color{0, 0, 0, 255}
@@ -37,15 +38,36 @@ fn main() {
 	app.carte = Hexa_world{
 		world: []Triatree_Ensemble{len: 6, init: Triatree_Ensemble{
 			liste_tree: []Triatree{len: 1, init: Triatree{
-				compo:     Elements.wood
-				id:        index
-				dimension: 8
-				coo:       []
+				const_velocity: f32(60 * math.pow(2, 8))
+				compo:          Elements.water
+				id:             index
+				dimension:      8
+				coo:            []
 			}}
 		}}
 	}
 	for _ in 0 .. 3 {
 		app.carte.divide_rec()
+	}
+
+	ids := [app.carte.world[0].liste_tree.len - 1, 56, 12, 42, app.carte.world[0].liste_tree.len - 10]
+	mut elem := Elements.wood
+	for current in 0 .. 6 {
+		for id in ids {
+			app.carte.world[current].liste_tree[id] = Triatree{
+				const_velocity: app.carte.world[current].liste_tree[id].const_velocity
+				velocity:       0
+				compo:          elem
+				id:             id
+				dimension:      app.carte.world[current].liste_tree[id].dimension
+				coo:            app.carte.world[current].liste_tree[id].coo
+			}
+			if elem == Elements.wood {
+				elem = Elements.stone
+			} else {
+				elem = Elements.wood
+			}
+		}
 	}
 
 	app.ctx.run()
@@ -58,8 +80,10 @@ fn on_frame(mut app App) {
 	app.ctx.begin()
 	app.ctx.end()
 
+	app.carte.gravity_update()
+
 	screen_center := vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2)) + app.view_pos
-	app.carte.draw(screen_center, 0, app.zomm_factor, 1, app.ctx)
+	app.carte.draw(screen_center, 0, app.zomm_factor, 0, app.ctx)
 }
 
 fn on_event(e &gg.Event, mut app App) {

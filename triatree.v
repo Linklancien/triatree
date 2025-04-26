@@ -3,10 +3,10 @@ module main
 import math
 import math.vec { Vec2, vec2 }
 import gg
-import rand
 
 const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
+const acceleration = 5
 
 enum Elements {
 	// element is a key of the elements_caras map
@@ -53,6 +53,7 @@ mut:
 }
 
 struct Triatree {
+	const_velocity f32
 mut:
 	compo Self
 
@@ -61,9 +62,16 @@ mut:
 
 	// entre dimensions_max et 0
 	coo []int
+
+	is_solid bool
+
+	// !is_fluid
+	count    int
+	velocity f32
 }
 
 struct Childs {
+mut:
 	mid   int
 	up    int
 	left  int
@@ -307,7 +315,7 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 		}
 	}
 
-	// else{panic("A 0 without 3 neigbors in it's base ??? coo: ${coo} current: ${current}")}
+	// else{panic("A 0 without 3 neighbors in it's base ??? coo: ${coo} current: ${current}")}
 	// coo is inside a triangle
 	return []int{len: 3, init: current}, directs_neighbors
 }
@@ -371,20 +379,20 @@ fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zoom_factor f32,
 }
 
 // find
-fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) int {
-	if coo == tree.coo {
+fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble, index int) int {
+	if tree.coo == coo {
 		return tree.id
 	}
 	match tree.compo {
 		Childs {
-			if coo[0] == 0 {
-				return parent.liste_tree[tree.compo.mid].go_to(coo[1..], parent)
-			} else if coo[0] == 1 {
-				return parent.liste_tree[tree.compo.up].go_to(coo[1..], parent)
-			} else if coo[0] == 2 {
-				return parent.liste_tree[tree.compo.left].go_to(coo[1..], parent)
-			} else if coo[0] == 3 {
-				return parent.liste_tree[tree.compo.right].go_to(coo[1..], parent)
+			if coo[index] == 0 {
+				return parent.liste_tree[tree.compo.mid].go_to(coo, parent, index + 1)
+			} else if coo[index] == 1 {
+				return parent.liste_tree[tree.compo.up].go_to(coo, parent, index + 1)
+			} else if coo[index] == 2 {
+				return parent.liste_tree[tree.compo.left].go_to(coo, parent, index + 1)
+			} else if coo[index] == 3 {
+				return parent.liste_tree[tree.compo.right].go_to(coo, parent, index + 1)
 			}
 		}
 		Elements {
@@ -396,12 +404,16 @@ fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble) int {
 	return -1
 }
 
+fn (parent Triatree_Ensemble) go_to(coo []int) int {
+	return parent.liste_tree[0].go_to(coo, parent, 0)
+}
+
 // PHYSIC:
 // TODO: prendre en compte si les case sont occupé lorsque 2 cases peuvent être les suivantes
 // maybe change by adding a new fonction
 
 // take a position, and a corner towards which is applied the gravity and return the next likely position
-fn gravity(coo []int, center int) []int {
+fn gravity(coo []int, center int) [][]int {
 	n := coo.len
 
 	if coo == [] {
@@ -415,83 +427,211 @@ fn gravity(coo []int, center int) []int {
 	// check if the current coo is at the gravity center
 	mut is_center := true
 	for i in 0 .. n {
-		id := n - i - 1
-		if coo[id] != center {
+		if coo[i] != center {
 			is_center = false
 			break
 		}
 	}
 
 	if is_center {
-		return coo
+		return []
 	}
 
 	nei := neighbors(coo)
-	mut next := coo[..n - 1].clone()
 	if is_reverse {
-		if coo[n - 1] == 0 {
-			next_final_nei := remove_from_base(triabase, [0, center])
-			mut final_co := 0
-			if rand.bernoulli(0.5) or { false } {
-				final_co = next_final_nei[0]
-			} else {
-				final_co = next_final_nei[1]
-			}
-
-			// used to find the neighbor that end with the desired value
-			for elem in nei {
-				if elem[n - 1] == final_co {
-					next = elem.clone()
-					break
+		if coo[n - 1] == center {
+			for neighbor in nei {
+				if neighbor[n - 1] == 0 {
+					return [neighbor]
 				}
 			}
-		} else if coo[n - 1] == center {
-			next << 0
+		} else if coo[n - 1] == 0 {
+			mut next := [][]int{}
+			for neighbor in nei {
+				if neighbor[n - 1] != center {
+					next << [neighbor]
+				}
+			}
+			return next
 		} else {
-			final_co := remove_from_base(triabase, [0, center, coo[n - 1]])[0]
-			for elem in nei {
-				if elem[n - 1] == final_co {
-					next = elem.clone()
-					break
+			other := remove_from_base([1, 2, 3], [center, coo[n - 1]])
+			for neighbor in nei {
+				if neighbor[n - 1] == other[0] {
+					return [neighbor]
 				}
 			}
 		}
 	} else {
-		if coo[n - 1] == 0 {
-			next << center
-		} else if coo[n - 1] == center {
-			next_final_nei := remove_from_base(triabase, [0, center])
-
-			if nei.len == 2 {
-				// in this case there is only one of the two neighbors which is closer to the center of gravity
-				for elem in nei {
-					if elem[n - 1] == next_final_nei[0] || elem[n - 1] == next_final_nei[1] {
-						next = elem.clone()
-						break
-					}
+		if coo[n - 1] == center {
+			mut next := [][]int{}
+			for neighbor in nei {
+				if neighbor[n - 1] != 0 {
+					next << [neighbor]
 				}
-			} else {
-				mut final_co := 0
-				if rand.bernoulli(0.5) or { false } {
-					final_co = next_final_nei[0]
-				} else {
-					final_co = next_final_nei[1]
+			}
+			return next
+		} else if coo[n - 1] == 0 {
+			for neighbor in nei {
+				if neighbor[n - 1] == center {
+					return [neighbor]
 				}
+			}
+		} else {
+			for neighbor in nei {
+				if neighbor[n - 1] == 0 {
+					return [neighbor]
+				}
+			}
+		}
+	}
 
-				// used to find the neighbor that end with the desired value
-				for elem in nei {
-					if elem[n - 1] == final_co {
-						next = elem.clone()
+	return [coo]
+}
+
+fn (mut hexa_world Hexa_world) gravity_update() {
+	for mut parent in hexa_world.world {
+		parent.gravity_update()
+	}
+}
+
+fn (mut parent Triatree_Ensemble) gravity_update() {
+	parent.liste_tree[0].gravity_update(mut parent)
+}
+
+fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
+	match mut tree.compo {
+		Elements {
+			tree.count += 1
+
+			// println('${tree.count} ${tree.velocity} ${tree.const_velocity} > ${tree.velocity * tree.count}')
+			possible := gravity(tree.coo, 1)
+			mut liste_id := []int{len: possible.len, init: parent.go_to(possible[index])}
+			checked := []bool{len: possible.len, init: tree.check_gravity(parent.liste_tree[liste_id[index]])}
+
+			// mut is_no_mouvement := true
+			for i in 0 .. checked.len {
+				if checked[i] {
+					if tree.const_velocity < tree.velocity * tree.count {
+						tree.count = 0
+						for tree.coo.len > parent.liste_tree[liste_id[i]].coo.len {
+							parent.liste_tree[liste_id[i]].divide(mut parent)
+							liste_id[i] = parent.go_to(possible[i])
+						}
+						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
+						// is_no_mouvement = false
 						break
 					}
 				}
 			}
-		} else {
-			next << 0
+
+			tree.velocity += acceleration
+		}
+		Childs {
+			parent.liste_tree[tree.compo.up].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.mid].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.left].gravity_update(mut parent)
+			parent.liste_tree[tree.compo.right].gravity_update(mut parent)
 		}
 	}
+}
 
-	return next
+fn (tree Triatree) check_gravity(other Triatree) bool {
+	// no need to change if the other is the same
+	if tree.compo == other.compo {
+		return false
+	}
+
+	// don't change if the other is solid
+	if other.is_solid {
+		return false
+	}
+
+	// don't change if the density is less then the other density
+	match tree.compo {
+		Elements {
+			match other.compo {
+				Elements {
+					if elements_caras[tree.compo].density < elements_caras[other.compo].density {
+						return false
+					}
+				}
+				else {}
+			}
+		}
+		else {}
+	}
+
+	return true
+}
+
+fn (mut parent Triatree_Ensemble) exchange(tree1_id int, tree2_id int) {
+	coo1 := parent.liste_tree[tree1_id].coo
+	coo2 := parent.liste_tree[tree2_id].coo
+
+	parent.liste_tree[tree1_id].change_coo(coo2, mut parent)
+	parent.liste_tree[tree2_id].change_coo(coo1, mut parent)
+
+	n1 := coo1.len
+	n2 := coo2.len
+	parent.liste_tree[parent.go_to(coo1[..(n1 - 1)])].change_child(coo1[n1 - 1], tree2_id)
+	parent.liste_tree[parent.go_to(coo2[..(n2 - 1)])].change_child(coo2[n2 - 1], tree1_id)
+}
+
+fn (mut triatree Triatree) change_child(end_coo int, id int) {
+	match mut triatree.compo {
+		Childs {
+			match end_coo {
+				0 {
+					triatree.compo.mid = id
+				}
+				1 {
+					triatree.compo.up = id
+				}
+				2 {
+					triatree.compo.left = id
+				}
+				3 {
+					triatree.compo.right = id
+				}
+				else {}
+			}
+		}
+		else {}
+	}
+}
+
+fn (mut triatree Triatree) change_coo(new_coo []int, mut parent Triatree_Ensemble) {
+	triatree.coo = new_coo
+	match mut triatree.compo {
+		Childs {
+			for i in 0 .. 4 {
+				match i {
+					0 {
+						mut coo := new_coo.clone()
+						coo << 0
+						parent.liste_tree[triatree.compo.mid].change_coo(coo, mut parent)
+					}
+					1 {
+						mut coo := new_coo.clone()
+						coo << 1
+						parent.liste_tree[triatree.compo.up].change_coo(coo, mut parent)
+					}
+					2 {
+						mut coo := new_coo.clone()
+						coo << 2
+						parent.liste_tree[triatree.compo.left].change_coo(coo, mut parent)
+					}
+					3 {
+						mut coo := new_coo.clone()
+						coo << 3
+						parent.liste_tree[triatree.compo.right].change_coo(coo, mut parent)
+					}
+					else {}
+				}
+			}
+		}
+		else {}
+	}
 }
 
 // CHANGE ELEMENTS
@@ -525,39 +665,46 @@ fn (mut tree Triatree) divide(mut parent Triatree_Ensemble) {
 				for new in 0 .. 4 {
 					mut next_coo := tree.coo.clone()
 					next_coo << [new]
-
+					const_velocity := f32(60 * math.pow(2, (tree.dimension - 1)))
 					mut id := -1
 					if parent.free_index.len != 0 {
 						id = parent.free_index.pop()
 						parent.liste_tree[id] = Triatree{
-							compo:     tree.compo
-							id:        id
-							dimension: (tree.dimension - 1)
-							coo:       next_coo
+							const_velocity: const_velocity
+							compo:          tree.compo
+							id:             id
+							dimension:      (tree.dimension - 1)
+							coo:            next_coo
+							count:          tree.count
+							velocity:       tree.velocity
 						}
 					} else {
 						id = parent.liste_tree.len
 						parent.liste_tree << [
 							Triatree{
-								compo:     tree.compo
-								id:        id
-								dimension: (tree.dimension - 1)
-								coo:       next_coo
+								const_velocity: const_velocity
+								compo:          tree.compo
+								id:             id
+								dimension:      (tree.dimension - 1)
+								coo:            next_coo
+								count:          tree.count
+								velocity:       tree.velocity
 							},
 						]
 					}
 					ids << [id]
 				}
 				parent.liste_tree[tree.id] = Triatree{
-					compo:     Childs{
+					const_velocity: tree.const_velocity
+					compo:          Childs{
 						mid:   ids[0]
 						up:    ids[1]
 						left:  ids[2]
 						right: ids[3]
 					}
-					id:        tree.id
-					dimension: tree.dimension
-					coo:       tree.coo.clone()
+					id:             tree.id
+					dimension:      tree.dimension
+					coo:            tree.coo.clone()
 				}
 			}
 			else {}

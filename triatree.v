@@ -518,6 +518,7 @@ fn (mut tree Triatree) gravity_update(mut parent Triatree_Ensemble) {
 							liste_id[i] = parent.go_to(possible[i])
 						}
 						parent.exchange(tree.id, parent.liste_tree[liste_id[i]].id)
+
 						// is_no_mouvement = false
 						break
 					}

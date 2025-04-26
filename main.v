@@ -5,7 +5,7 @@ import math
 import gg
 
 const bg_color = gg.Color{0, 0, 0, 255}
-const mouv = 10
+const mouv = 20
 const zoom_const = 0.1
 
 struct App {
@@ -22,9 +22,9 @@ mut:
 fn main() {
 	mut app := &App{}
 	app.ctx = gg.new_context(
-		fullscreen:    false
-		width:         100 * 8
-		height:        100 * 8
+		fullscreen:    true
+		// width:         100 * 8
+		// height:        100 * 8
 		create_window: true
 		window_title:  '- Triatree -'
 		user_data:     app
@@ -70,6 +70,8 @@ fn main() {
 		}
 	}
 
+	app.view_pos += vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2))
+
 	app.ctx.run()
 }
 
@@ -82,8 +84,7 @@ fn on_frame(mut app App) {
 
 	app.carte.gravity_update()
 
-	screen_center := vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2)) + app.view_pos
-	app.carte.draw(screen_center, 0, app.zomm_factor, 0, app.ctx)
+	app.carte.draw(app.view_pos, 0, app.zomm_factor, 0, app.ctx)
 }
 
 fn on_event(e &gg.Event, mut app App) {
@@ -104,10 +105,22 @@ fn on_event(e &gg.Event, mut app App) {
 			app.zomm_factor += zoom_const
 		}
 		.page_down {
-			if app.zomm_factor != 1 {
+			if app.zomm_factor > 1 {
 				app.zomm_factor -= zoom_const
 			}
 		}
+		.mouse_scroll {
+            e.scroll_y{
+				if e.scroll_y > 0{
+					app.zomm_factor += zoom_const
+				}
+				else if e.scroll_y < 0{
+					if app.zomm_factor > 1 {
+						app.zomm_factor -= zoom_const
+					}
+				}
+			}
+        }
 		else {}
 	}
 }

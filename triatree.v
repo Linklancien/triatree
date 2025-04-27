@@ -750,6 +750,83 @@ fn (mut hexa_world Hexa_world) divide_rec() {
 	}
 }
 
+fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
+	if deep == 0 {
+		return []Triatree{len: 1, init: Triatree{
+			const_velocity: (60 * math.pow(2, dimension))
+			compo:          Elements.wood
+			id:             0
+			dimension:      dimension
+			coo:            []
+		}}
+	}
+
+	mut triatree_liste := []Triatree{len: 1, init: Triatree{
+		const_velocity: (60 * math.pow(2, dimension))
+		compo:          Childs{
+			mid:   0
+			up:    1
+			left:  2
+			right: 3
+		}
+		id:             0
+		dimension:      dimension
+		coo:            []
+	}}
+
+	mut id := 1
+	for dim in 1 .. (deep + 1) {
+		taille_liste := triatree_liste.len
+		for _ in 0 .. math.pow(4, dim) {
+			if dim == deep - 1 {
+				triatree_liste << Triatree{
+					const_velocity: (60 * math.pow(2, dimension - dim))
+					compo:          Elements.wood
+					id:             id
+					dimension:      dimension - dim
+					coo:            []
+				}
+			} else {
+				next_compo := Childs{
+					mid:   0
+					up:    1
+					left:  2
+					right: 3
+				}
+				triatree_liste << Triatree{
+					const_velocity: (60 * math.pow(2, dimension - dim))
+					compo:          next_compo
+					id:             id
+					dimension:      dimension - dim
+					coo:            []
+				}
+			}
+			id += 1
+		}
+	}
+
+	return triatree_liste
+}
+
+fn index_to_coo(ind int) []int {
+	mut coo := []int{}
+	match x % 4 {
+		0 {
+			coo << []
+		}
+		1 {
+			coo << []
+		}
+		4 {
+			coo << []
+		}
+		3 {
+			coo << []
+		}
+	}
+	return coo
+}
+
 // MERGE:
 
 // Merge for TRIATREE

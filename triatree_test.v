@@ -1,5 +1,7 @@
 module main
 
+import math
+
 fn test_coos() {
 	println('--------------------')
 	println('test_coos():')
@@ -332,10 +334,37 @@ fn test_change_elements() {
 	println('--------------------')
 }
 
+fn test_init_ensemble_divide() {
+	println('--------------------')
+	println('test_init_ensemble_divide():')
+
+	println('test 1 special case: ')
+	tria_ensemble_test := Triatree_Ensemble{
+		liste_tree: init_ensemble_divide(3, 1, Elements.water)
+	}
+	assert tria_ensemble_test.liste_tree.len == 5, 'assertion failed len incorrect'
+	println('success')
+
+	println('test 2 rec: ')
+	mut len := 0
+	for i in 0 .. 3 {
+		len += int(math.pow(4, i))
+		tria_ensemble := Triatree_Ensemble{
+			liste_tree: init_ensemble_divide(3, i, Elements.water)
+		}
+		assert tria_ensemble.liste_tree.len == len, 'assertion failed len incorrect'
+	}
+	println('success')
+
+	println('Passed')
+	println('--------------------')
+}
+
 fn test_index_to_coo() {
 	println('--------------------')
 	println('test_check_reverse():')
 
+	println('test 1 special case: ')
 	assert index_to_coo(0) == []
 	assert index_to_coo(1) == [0]
 	assert index_to_coo(2) == [1]
@@ -357,6 +386,7 @@ fn test_index_to_coo() {
 	assert index_to_coo(18) == [3, 1]
 	assert index_to_coo(19) == [3, 2]
 	assert index_to_coo(20) == [3, 3]
+	println('success')
 
 	println('Passed')
 	println('--------------------')

@@ -63,9 +63,9 @@ mut:
 	// entre dimensions_max et 0
 	coo []int
 
+	// !is_fluid
 	is_solid bool
 
-	// !is_fluid
 	count    int
 	velocity f32
 }
@@ -764,10 +764,10 @@ fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
 	mut triatree_liste := []Triatree{len: 1, init: Triatree{
 		const_velocity: f32(60 * math.pow(2, dimension))
 		compo:          Childs{
-			mid:   0
-			up:    1
-			left:  2
-			right: 3
+			mid:   1
+			up:    2
+			left:  3
+			right: 4
 		}
 		id:             0
 		dimension:      dimension
@@ -784,21 +784,22 @@ fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
 					compo:          Elements.wood
 					id:             id
 					dimension:      dimension - dim
-					coo:            []
+					coo:            index_to_coo(id)
 				}
 			} else {
-				next_compo := Childs{
-					mid:   0
-					up:    1
-					left:  2
-					right: 3
-				}
+				ids := index_to_childs_index(id)
+
 				triatree_liste << Triatree{
 					const_velocity: f32(60 * math.pow(2, dimension - dim))
-					compo:          next_compo
+					compo:          Childs{
+						mid:   ids[0]
+						up:    ids[1]
+						left:  ids[2]
+						right: ids[3]
+					}
 					id:             id
 					dimension:      dimension - dim
-					coo:            []
+					coo:            index_to_coo(id)
 				}
 			}
 			id += 1
@@ -828,12 +829,10 @@ fn index_to_coo(ind int) []int {
 	return coo
 }
 
-// 0 -> []
-// 1 -> [0], 2 -> [1], 3 -> [2], 4 -> [3]
-// 5 -> [0, 0], 6 -> [0, 1], 7 -> [0, 2], 8 -> [0, 3]
-// 9 -> [1, 0], 10 -> [1, 1], 11 -> [1, 2], 12 -> [1, 3]
-// 13 -> [2, 0], 14 -> [2, 1], 15 -> [2, 2], 16 -> [2, 3]
-// 17 -> [3, 0], 18 -> [3, 1], 19 -> [3, 2], 20 -> [3, 3]
+fn index_to_childs_index(ind int) []int {
+	n := ind * 4
+	return [n + 1, n + 2, n + 3, n + 4]
+}
 
 // MERGE:
 

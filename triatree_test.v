@@ -332,6 +332,36 @@ fn test_change_elements() {
 	println('--------------------')
 }
 
+fn test_index_to_coo() {
+	println('--------------------')
+	println('test_check_reverse():')
+
+	assert index_to_coo(0) == []
+	assert index_to_coo(1) == [0]
+	assert index_to_coo(2) == [1]
+	assert index_to_coo(3) == [2]
+	assert index_to_coo(4) == [3]
+	assert index_to_coo(5) == [0, 0]
+	assert index_to_coo(6) == [0, 1]
+	assert index_to_coo(7) == [0, 2]
+	assert index_to_coo(8) == [0, 3]
+	assert index_to_coo(9) == [1, 0]
+	assert index_to_coo(10) == [1, 1]
+	assert index_to_coo(11) == [1, 2]
+	assert index_to_coo(12) == [1, 3]
+	assert index_to_coo(13) == [2, 0]
+	assert index_to_coo(14) == [2, 1]
+	assert index_to_coo(15) == [2, 2]
+	assert index_to_coo(16) == [2, 3]
+	assert index_to_coo(17) == [3, 0]
+	assert index_to_coo(18) == [3, 1]
+	assert index_to_coo(19) == [3, 2]
+	assert index_to_coo(20) == [3, 3]
+
+	println('Passed')
+	println('--------------------')
+}
+
 fn test_divide_and_merge() {
 	println('--------------------')
 	println('test_divide_and_merge():')

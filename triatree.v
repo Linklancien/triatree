@@ -753,7 +753,7 @@ fn (mut hexa_world Hexa_world) divide_rec() {
 fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
 	if deep == 0 {
 		return []Triatree{len: 1, init: Triatree{
-			const_velocity: (60 * math.pow(2, dimension))
+			const_velocity: f32(60 * math.pow(2, dimension))
 			compo:          Elements.wood
 			id:             0
 			dimension:      dimension
@@ -762,7 +762,7 @@ fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
 	}
 
 	mut triatree_liste := []Triatree{len: 1, init: Triatree{
-		const_velocity: (60 * math.pow(2, dimension))
+		const_velocity: f32(60 * math.pow(2, dimension))
 		compo:          Childs{
 			mid:   0
 			up:    1
@@ -777,10 +777,10 @@ fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
 	mut id := 1
 	for dim in 1 .. (deep + 1) {
 		taille_liste := triatree_liste.len
-		for _ in 0 .. math.pow(4, dim) {
+		for _ in 0 .. int(math.pow(4, dim)) {
 			if dim == deep - 1 {
 				triatree_liste << Triatree{
-					const_velocity: (60 * math.pow(2, dimension - dim))
+					const_velocity: f32(60 * math.pow(2, dimension - dim))
 					compo:          Elements.wood
 					id:             id
 					dimension:      dimension - dim
@@ -794,7 +794,7 @@ fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
 					right: 3
 				}
 				triatree_liste << Triatree{
-					const_velocity: (60 * math.pow(2, dimension - dim))
+					const_velocity: f32(60 * math.pow(2, dimension - dim))
 					compo:          next_compo
 					id:             id
 					dimension:      dimension - dim
@@ -809,23 +809,31 @@ fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
 }
 
 fn index_to_coo(ind int) []int {
-	mut coo := []int{}
-	match x % 4 {
-		0 {
-			coo << []
-		}
-		1 {
-			coo << []
-		}
-		4 {
-			coo << []
-		}
-		3 {
-			coo << []
-		}
+	if ind == 0 {
+		return []int{}
 	}
+
+	mut coo := []int{}
+	mut n := ind - 1
+	for n / 4 != 0 {
+		tempo := coo.clone()
+		coo = [n % 4]
+		coo << tempo
+		n = n / 4 - 1
+	}
+	tempo := coo.clone()
+	coo = [n % 4]
+	coo << tempo
+
 	return coo
 }
+
+// 0 -> []
+// 1 -> [0], 2 -> [1], 3 -> [2], 4 -> [3]
+// 5 -> [0, 0], 6 -> [0, 1], 7 -> [0, 2], 8 -> [0, 3]
+// 9 -> [1, 0], 10 -> [1, 1], 11 -> [1, 2], 12 -> [1, 3]
+// 13 -> [2, 0], 14 -> [2, 1], 15 -> [2, 2], 16 -> [2, 3]
+// 17 -> [3, 0], 18 -> [3, 1], 19 -> [3, 2], 20 -> [3, 3]
 
 // MERGE:
 

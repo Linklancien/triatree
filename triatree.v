@@ -6,7 +6,7 @@ import gg
 
 const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
-const acceleration = 5
+const acceleration = 50
 
 enum Elements {
 	// element is a key of the elements_caras map
@@ -776,12 +776,11 @@ fn init_ensemble_divide(dimension int, deep int, elem Elements) []Triatree {
 
 	mut id := 1
 	for dim in 1 .. (deep + 1) {
-		taille_liste := triatree_liste.len
 		for _ in 0 .. int(math.pow(4, dim)) {
 			if dim == deep - 1 {
 				triatree_liste << Triatree{
 					const_velocity: f32(60 * math.pow(2, dimension - dim))
-					compo:          Elements.wood
+					compo:          elem
 					id:             id
 					dimension:      dimension - dim
 					coo:            index_to_coo(id)

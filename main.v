@@ -1,7 +1,6 @@
 module main
 
 import math.vec { Vec2, vec2 }
-import math
 import gg
 
 const bg_color = gg.Color{0, 0, 0, 255}
@@ -37,13 +36,7 @@ fn main() {
 
 	app.carte = Hexa_world{
 		world: []Triatree_Ensemble{len: 6, init: Triatree_Ensemble{
-			liste_tree: []Triatree{len: 1, init: Triatree{
-				const_velocity: f32(60 * math.pow(2, 8))
-				compo:          Elements.water
-				id:             index
-				dimension:      8
-				coo:            []
-			}}
+			liste_tree: init_ensemble_divide(8, 2, Elements.water)
 		}}
 	}
 	for _ in 0 .. 3 {
@@ -70,12 +63,15 @@ fn main() {
 		}
 	}
 
-	app.view_pos += vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2))
-
 	app.ctx.run()
 }
 
-fn on_init(mut app App) {}
+fn on_init(mut app App) {
+	size := app.ctx.window_size()
+	app.ctx.width = size.width
+	app.ctx.height = size.height
+	app.view_pos = vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2))
+}
 
 fn on_frame(mut app App) {
 	// clear
@@ -108,6 +104,9 @@ fn on_event(e &gg.Event, mut app App) {
 			if app.zomm_factor > 1 {
 				app.zomm_factor -= zoom_const
 			}
+		}
+		.escape {
+			app.ctx.quit()
 		}
 		// .mouse_scroll {
 		// 	e.scroll_y

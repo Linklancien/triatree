@@ -466,7 +466,7 @@ fn test_divide_and_merge() {
 
 	print('test 4 in hexa_world: ')
 	mut hexa_world := Hexa_world{
-		world: []Triatree_Ensemble{len: 6, init: Triatree_Ensemble{
+		world: [6]Triatree_Ensemble{init: Triatree_Ensemble{
 			liste_tree: []Triatree{len: 1, init: Triatree{
 				compo:     Elements.wood
 				id:        index

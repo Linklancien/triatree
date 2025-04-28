@@ -77,6 +77,7 @@ fn on_frame(mut app App) {
 	// clear
 	app.ctx.begin()
 	app.ctx.end()
+	app.ctx.show_fps()
 
 	app.carte.gravity_update()
 

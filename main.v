@@ -35,7 +35,7 @@ fn main() {
 	)
 
 	app.carte = Hexa_world{
-		world: []Triatree_Ensemble{len: 6, init: Triatree_Ensemble{
+		world: [6]Triatree_Ensemble{init: Triatree_Ensemble{
 			liste_tree: init_ensemble_divide(8, 2, Elements.water)
 		}}
 	}

@@ -49,7 +49,7 @@ mut:
 
 struct Hexa_world {
 mut:
-	world []Triatree_Ensemble
+	world [6]Triatree_Ensemble
 }
 
 struct Triatree {

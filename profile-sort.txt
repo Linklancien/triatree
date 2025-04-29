@@ -1,6 +1,6 @@
              1       2747.207ms        201.065ms     2747206700ns main__test_coos 
          42924       1718.731ms        103.226ms          40041ns str_intp 
-         30464       1187.305ms         54.358ms           38974ns main__
+         30464       1187.305ms         54.358ms           38974ns main__coo_cart_to_tria 
         211515       1115.964ms        122.545ms           5276ns StrIntpData_process_str_intp_data 
          65598        782.623ms         27.317ms          11931ns f32_strg 
          64496        735.429ms         40.426ms          11403ns strconv__f32_to_str_l_with_dot 

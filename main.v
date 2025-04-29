@@ -22,7 +22,8 @@ mut:
 fn main() {
 	mut app := &App{}
 	app.ctx = gg.new_context(
-		fullscreen:    true
+		fullscreen: true
+
 		// width:         100 * 8
 		// height:        100 * 8
 		create_window: true
@@ -109,18 +110,18 @@ fn on_event(e &gg.Event, mut app App) {
 				app.zomm_factor -= zoom_const
 			}
 		}
-		.mouse_scroll {
-            e.scroll_y{
-				if e.scroll_y > 0{
-					app.zomm_factor += zoom_const
-				}
-				else if e.scroll_y < 0{
-					if app.zomm_factor > 1 {
-						app.zomm_factor -= zoom_const
-					}
-				}
-			}
-        }
+		// .mouse_scroll {
+		// 	e.scroll_y
+		// 	{
+		// 		if e.scroll_y > 0 {
+		// 			app.zomm_factor += zoom_const
+		// 		} else if e.scroll_y < 0 {
+		// 			if app.zomm_factor > 1 {
+		// 				app.zomm_factor -= zoom_const
+		// 			}
+		// 		}
+		// 	}
+		// }
 		else {}
 	}
 }

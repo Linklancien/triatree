@@ -3,11 +3,18 @@ module main
 import math
 import math.vec { Vec2, vec2 }
 import gg
+import vsl.noise // v install vsl
 
 const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
 const acceleration = 50
 const sqrt3 = math.sqrt(3)
+
+interface Appli {
+mut:
+	ctx     &gg.Context
+	draw_nb int
+}
 
 enum Elements {
 	// element is a key of the elements_caras map
@@ -79,6 +86,33 @@ mut:
 	right int
 }
 
+// GEN PROC
+
+fn (mut hw Hexa_world) gen_terrain(dim int) {
+	gen := noise.Generator.new()
+	res := 1000
+	radius := 150
+	x_c := 0
+	y_c := 0
+	full_c := 2 * math.pi
+	arc := full_c / res
+	perlin_scale := 2.0
+	perlin_x_off := 0.0
+	perlin_y_off := 0.0
+	per_size := 22.0
+	for i in 0 .. res {
+		cos := math.cos(i * arc)
+		sin := math.sin(i * arc)
+		mut x := x_c + radius * cos
+		mut y := y_c + radius * sin
+		per := gen.simplex_2d(perlin_x_off + cos * perlin_scale, perlin_y_off + sin * perlin_scale)
+		x += per * per_size * cos
+		y += per * per_size * sin
+		idx, nb := hw.go_to_coords(f32(x), f32(y), dim)
+		hw.world[nb].liste_tree[idx].change_elements(.wood, mut hw.world[nb])
+	}
+}
+
 // COO TRIA TO CART:
 fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
 	mut position := vec2[f32](0.0, 0.0)
@@ -124,9 +158,10 @@ fn coo_cart_corners(coo []int, rota f32, dimensions_max int) (Vec2[f32], Vec2[f3
 }
 
 // COO CART TO TRIA:
+// dimension is the dim of the biggest triangle
 fn coo_cart_to_tria(pos Vec2[f32], dimension int) []int {
 	// at the start the child 1 of the hugest triangle is pointing downward
-	if dimension == 0 {
+	if dimension <= 0 {
 		return []int{}
 	}
 
@@ -322,7 +357,7 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 }
 
 // graphics:
-fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, parent Triatree_Ensemble, ctx gg.Context) {
+fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, parent Triatree_Ensemble, mut app Appli) {
 	match tree.compo {
 		Elements {
 			pos := pos_center + (coo_tria_to_cart(tree.coo, rota, tree.dimension +
@@ -340,32 +375,35 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, parent 
 				angle += math.pi
 			}
 			size := f32(zoom_factor * math.pow(2, tree.dimension) / sqrt3) - 1
-			ctx.begin()
-			ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
+			app.ctx.draw_polygon_filled(pos.x, -pos.y, size, 3, f32(math.degrees(angle)),
 				elements_caras[tree.compo].color)
-			ctx.end(how: .passthru)
+			if app.draw_nb % 1000 == 0 {
+				app.ctx.end(how: .passthru)
+				app.ctx.begin()
+			}
+			app.draw_nb += 1
 		}
 		Childs {
-			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zoom_factor, parent,
-				ctx)
-			parent.liste_tree[tree.compo.up].draw(pos_center, rota, zoom_factor, parent,
-				ctx)
-			parent.liste_tree[tree.compo.left].draw(pos_center, rota, zoom_factor, parent,
-				ctx)
-			parent.liste_tree[tree.compo.right].draw(pos_center, rota, zoom_factor, parent,
-				ctx)
+			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zoom_factor, parent, mut
+				app)
+			parent.liste_tree[tree.compo.up].draw(pos_center, rota, zoom_factor, parent, mut
+				app)
+			parent.liste_tree[tree.compo.left].draw(pos_center, rota, zoom_factor, parent, mut
+				app)
+			parent.liste_tree[tree.compo.right].draw(pos_center, rota, zoom_factor, parent, mut
+				app)
 		}
 	}
 }
 
-fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, ctx gg.Context) {
+fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, mut app Appli) {
 	if tria_ensemble.liste_tree.len != 0 {
-		tria_ensemble.liste_tree[0].draw(pos_center, rota, zoom_factor, tria_ensemble,
-			ctx)
+		tria_ensemble.liste_tree[0].draw(pos_center, rota, zoom_factor, tria_ensemble, mut
+			app)
 	}
 }
 
-fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, current int, ctx gg.Context) {
+fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, current int, mut app Appli) {
 	for i in 0 .. 6 {
 		if hexa_world.world[i].liste_tree.len != 0 {
 			angle := rota + (i - f32(current)) * math.pi / 3
@@ -374,7 +412,7 @@ fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zoom_factor f32,
 			dist := f32(math.pow(2, dim) / sqrt3 * zoom_factor)
 			pos := pos_center + (vec2[f32](0, dist)).rotate_around_ccw(center, angle)
 
-			hexa_world.world[i].draw(pos, angle, zoom_factor, ctx)
+			hexa_world.world[i].draw(pos, angle, zoom_factor, mut app)
 		}
 	}
 }
@@ -407,6 +445,15 @@ fn (tree Triatree) go_to(coo []int, parent Triatree_Ensemble, index int) int {
 
 fn (parent Triatree_Ensemble) go_to(coo []int) int {
 	return parent.liste_tree[0].go_to(coo, parent, 0)
+}
+
+fn (parent Triatree_Ensemble) go_to_coords(x f32, y f32, dim int) int {
+	return parent.go_to(coo_cart_to_tria(vec2(x, y), dim))
+}
+
+fn (hw Hexa_world) go_to_coords(x f32, y f32, dim int) (int, int) {
+	coo, nb := hexa_world_coo_cart_to_tria(vec2(x, y), dim)
+	return hw.world[nb].go_to(coo), nb
 }
 
 // PHYSIC:

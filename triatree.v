@@ -119,9 +119,10 @@ fn (mut hw Hexa_world) gen_terrain(dim int) {
 // COO TRIA TO CART:
 @[inline]
 fn (mut app Appli) coo_tria_to_cart(coo []int, rota_i int, dimensions_max int) Vec2[f32] {
-	mut coord := u64(rota_i)
+	mut coord := u64(rota_i) // rota is between 0 and 5 so will take the first 3 bits
 	for i, c in coo {
-		coord |= (u8(c) & 0x3) << (i * 2 + 3) // 3 for the rota 1->6
+		// for each coord (between 0 and 3) writes 2 bits and offset the bits each time to not override the previous ones
+		coord |= (u8(c) & 0x3) << (i * 2 + 3)
 	}
 	return app.coord_cache[coord] or {
 		mut position := vec2[f32](0.0, 0.0)

@@ -68,7 +68,6 @@ fn main() {
 	*/
 
 	app.carte.gen_terrain(dim_base)
-	app.view_pos += vec2[f32](f32(app.ctx.width / 2), f32(-app.ctx.height / 2))
 
 	app.ctx.run()
 }

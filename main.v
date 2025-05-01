@@ -22,6 +22,7 @@ fn main() {
 	mut app := &App{}
 	app.ctx = gg.new_context(
 		fullscreen: true
+
 		// width:         100 * 8
 		// height:        100 * 8
 		create_window: true

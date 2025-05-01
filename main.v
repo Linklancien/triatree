@@ -15,8 +15,10 @@ mut:
 
 	//
 	draw_nb     int = 1
+	rota_cache  [6]f32
+	coord_cache map[u64]Vec2[f32]
 	view_pos    Vec2[f32]
-	zomm_factor f32 = 1
+	zomm_factor f32 = 4
 }
 
 const dim_base = 8
@@ -94,42 +96,44 @@ fn on_frame(mut app App) {
 }
 
 fn on_event(e &gg.Event, mut app App) {
-	match e.key_code {
-		.up {
-			app.view_pos += vec2[f32](f32(0), -f32(mouv))
-		}
-		.down {
-			app.view_pos += vec2[f32](f32(0), f32(mouv))
-		}
-		.left {
-			app.view_pos += vec2[f32](f32(mouv), f32(0))
-		}
-		.right {
-			app.view_pos += vec2[f32](f32(-mouv), f32(0))
-		}
-		.page_up {
-			app.zomm_factor += zoom_const
-		}
-		.page_down {
-			if app.zomm_factor > 1 {
-				app.zomm_factor -= zoom_const
+	match e.typ {
+		.key_down {
+			match e.key_code {
+				.up {
+					app.view_pos += vec2[f32](f32(0), -f32(mouv))
+				}
+				.down {
+					app.view_pos += vec2[f32](f32(0), f32(mouv))
+				}
+				.left {
+					app.view_pos += vec2[f32](f32(mouv), f32(0))
+				}
+				.right {
+					app.view_pos += vec2[f32](f32(-mouv), f32(0))
+				}
+				.page_up {
+					app.zomm_factor += zoom_const
+				}
+				.page_down {
+					if app.zomm_factor > 1 {
+						app.zomm_factor -= zoom_const
+					}
+				}
+				.escape {
+					app.ctx.quit()
+				}
+				else {}
 			}
 		}
-		.escape {
-			app.ctx.quit()
+		.mouse_scroll {
+			if e.scroll_y > 0 {
+				app.zomm_factor += zoom_const
+			} else if e.scroll_y < 0 {
+				if app.zomm_factor > 1 {
+					app.zomm_factor -= zoom_const
+				}
+			}
 		}
-		// .mouse_scroll {
-		// 	e.scroll_y
-		// 	{
-		// 		if e.scroll_y > 0 {
-		// 			app.zomm_factor += zoom_const
-		// 		} else if e.scroll_y < 0 {
-		// 			if app.zomm_factor > 1 {
-		// 				app.zomm_factor -= zoom_const
-		// 			}
-		// 		}
-		// 	}
-		// }
 		else {}
 	}
 }

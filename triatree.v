@@ -9,11 +9,14 @@ const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
 const acceleration = 50
 const sqrt3 = math.sqrt(3)
+const pow2 = []f64{len: 100, init: math.pow(2, index - 10)}
 
 interface Appli {
 mut:
-	ctx     &gg.Context
-	draw_nb int
+	ctx         &gg.Context
+	draw_nb     int
+	rota_cache  [6]f32
+	coord_cache map[u64]Vec2[f32]
 }
 
 enum Elements {
@@ -90,7 +93,7 @@ mut:
 
 fn (mut hw Hexa_world) gen_terrain(dim int) {
 	gen := noise.Generator.new()
-	res := 1000
+	res := 10000
 	radius := 150
 	x_c := 0
 	y_c := 0
@@ -114,37 +117,48 @@ fn (mut hw Hexa_world) gen_terrain(dim int) {
 }
 
 // COO TRIA TO CART:
-fn coo_tria_to_cart(coo []int, rota f32, dimensions_max int) Vec2[f32] {
-	mut position := vec2[f32](0.0, 0.0)
-	mut angle := rota
-	for id in 0 .. coo.len {
-		dim := dimensions_max - id - 1
-		dist := f32(math.pow(2, dim) / sqrt3)
-		if coo[id] == 0 {
-			angle += math.pi
-		} else if coo[id] == 1 {
-			position += vec2[f32](dist, 0).rotate_around_ccw(center, angle - math.pi / 2)
-		} else if coo[id] == 2 {
-			position += vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi / 6)
-		} else if coo[id] == 3 {
-			position += vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi * 5 / 6)
-		}
+@[inline]
+fn (mut app Appli) coo_tria_to_cart(coo []int, rota_i int, dimensions_max int) Vec2[f32] {
+	mut coord := u64(rota_i)
+	for i, c in coo {
+		coord |= (u8(c) & 0x3) << (i * 2 + 3) // 3 for the rota 1->6
 	}
-	return position
+	return app.coord_cache[coord] or {
+		mut position := vec2[f32](0.0, 0.0)
+		mut angle := app.rota_cache[rota_i]
+		for id in 0 .. coo.len {
+			dim := dimensions_max - id - 1
+			if dim < -10 {
+				break
+			}
+			dist := f32(pow2[dim + 10] / sqrt3)
+			if coo[id] == 0 {
+				angle += math.pi
+			} else if coo[id] == 1 {
+				position += vec2[f32](dist, 0).rotate_around_ccw(center, angle - math.pi / 2)
+			} else if coo[id] == 2 {
+				position += vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi / 6)
+			} else if coo[id] == 3 {
+				position += vec2[f32](dist, 0).rotate_around_ccw(center, angle + math.pi * 5 / 6)
+			}
+		}
+		app.coord_cache[coord] = position
+		position
+	}
 }
 
-fn hexa_world_coo_tria_to_cart(coo []int, current int, dimensions_max int) Vec2[f32] {
+fn (mut app Appli) hexa_world_coo_tria_to_cart(coo []int, current int, dimensions_max int) Vec2[f32] {
 	rota := f32(current - 1) * math.pi / 3
 	dist := f32(math.pow(2, dimensions_max) / sqrt3)
-	coo_in_triangle := (coo_tria_to_cart(coo, 0, dimensions_max) + vec2[f32](0, dist)).rotate_around_ccw(center,
+	coo_in_triangle := (app.coo_tria_to_cart(coo, 0, dimensions_max) + vec2[f32](0, dist)).rotate_around_ccw(center,
 		rota)
 	return coo_in_triangle
 }
 
 // return the coo of the 3 corners of a triangle in order [1, 2, 3]
-fn coo_cart_corners(coo []int, rota f32, dimensions_max int) (Vec2[f32], Vec2[f32], Vec2[f32]) {
-	center_pos := coo_tria_to_cart(coo, rota, dimensions_max)
-	mut angle := rota
+fn (mut app Appli) coo_cart_corners(coo []int, rota_i int, dimensions_max int) (Vec2[f32], Vec2[f32], Vec2[f32]) {
+	center_pos := app.coo_tria_to_cart(coo, rota_i, dimensions_max)
+	mut angle := app.rota_cache[rota_i]
 	for id in 0 .. coo.len {
 		if coo[id] == 0 {
 			angle += math.pi
@@ -357,12 +371,12 @@ fn hexa_world_neighbors(coo []int, current int) ([]int, [][]int) {
 }
 
 // graphics:
-fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, parent Triatree_Ensemble, mut app Appli) {
+fn (tree Triatree) draw(pos_center Vec2[f32], rota_i int, zoom_factor f32, parent Triatree_Ensemble, mut app Appli) {
 	match tree.compo {
 		Elements {
-			pos := pos_center + (coo_tria_to_cart(tree.coo, rota, tree.dimension +
+			pos := pos_center + (app.coo_tria_to_cart(tree.coo, rota_i, tree.dimension +
 				tree.coo.len)).mul_scalar(zoom_factor)
-			mut angle := -rota - math.pi / 6
+			mut angle := -app.rota_cache[rota_i] - math.pi / 6
 
 			mut is_reverse := false
 			for elem in tree.coo {
@@ -384,35 +398,37 @@ fn (tree Triatree) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, parent 
 			app.draw_nb += 1
 		}
 		Childs {
-			parent.liste_tree[tree.compo.mid].draw(pos_center, rota, zoom_factor, parent, mut
+			parent.liste_tree[tree.compo.mid].draw(pos_center, rota_i, zoom_factor, parent, mut
 				app)
-			parent.liste_tree[tree.compo.up].draw(pos_center, rota, zoom_factor, parent, mut
+			parent.liste_tree[tree.compo.up].draw(pos_center, rota_i, zoom_factor, parent, mut
 				app)
-			parent.liste_tree[tree.compo.left].draw(pos_center, rota, zoom_factor, parent, mut
+			parent.liste_tree[tree.compo.left].draw(pos_center, rota_i, zoom_factor, parent, mut
 				app)
-			parent.liste_tree[tree.compo.right].draw(pos_center, rota, zoom_factor, parent, mut
-				app)
+			parent.liste_tree[tree.compo.right].draw(pos_center, rota_i, zoom_factor,
+				parent, mut app)
 		}
 	}
 }
 
-fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, mut app Appli) {
+fn (tria_ensemble Triatree_Ensemble) draw(pos_center Vec2[f32], rota_i int, zoom_factor f32, mut app Appli) {
 	if tria_ensemble.liste_tree.len != 0 {
-		tria_ensemble.liste_tree[0].draw(pos_center, rota, zoom_factor, tria_ensemble, mut
+		tria_ensemble.liste_tree[0].draw(pos_center, rota_i, zoom_factor, tria_ensemble, mut
 			app)
 	}
 }
 
+// current is the side of the world facing up
 fn (hexa_world Hexa_world) draw(pos_center Vec2[f32], rota f32, zoom_factor f32, current int, mut app Appli) {
 	for i in 0 .. 6 {
 		if hexa_world.world[i].liste_tree.len != 0 {
 			angle := rota + (i - f32(current)) * math.pi / 3
+			app.rota_cache[i] = angle
 
 			dim := hexa_world.world[i].liste_tree[0].dimension
 			dist := f32(math.pow(2, dim) / sqrt3 * zoom_factor)
 			pos := pos_center + (vec2[f32](0, dist)).rotate_around_ccw(center, angle)
 
-			hexa_world.world[i].draw(pos, angle, zoom_factor, mut app)
+			hexa_world.world[i].draw(pos, i, zoom_factor, mut app)
 		}
 	}
 }

@@ -87,8 +87,8 @@ fn on_frame(mut app App) {
 
 	app.ctx.begin()
 	app.draw_nb = 1
-	//	app.carte.gravity_update()
 
+	//	app.carte.gravity_update()
 	app.carte.draw(app.view_pos, 0, app.zomm_factor, 0, mut app)
 	app.ctx.show_fps()
 	app.ctx.end(how: .passthru)

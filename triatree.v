@@ -3,7 +3,8 @@ module main
 import math
 import math.vec { Vec2, vec2 }
 import gg
-import vsl.noise // v install vsl
+import vsl.noise
+// v install vsl
 
 const triabase = [0, 1, 2, 3]
 const center = vec2[f32](f32(0), f32(0))
@@ -90,7 +91,6 @@ mut:
 }
 
 // GEN PROC
-
 fn (mut hw Hexa_world) gen_terrain(dim int) {
 	gen := noise.Generator.new()
 	res := 10000

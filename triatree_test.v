@@ -1,6 +1,7 @@
 module main
 
 import math
+import math.vec { Vec2 }
 
 fn test_coos() {
 	println('--------------------')
@@ -26,6 +27,9 @@ fn test_coos() {
 		}
 	}
 	println('success')
+
+	// RESET
+	app.coord_cache = map[u64]Vec2[f32]{}
 	print('test 2 hugest bijection:')
 	for x in 0 .. 4 {
 		for y in 0 .. 4 {

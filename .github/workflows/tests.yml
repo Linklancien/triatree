@@ -30,6 +30,7 @@ jobs:
           unzip -q /tmp/v.zip -d /tmp
           echo /tmp/v >> "$GITHUB_PATH"
           sudo apt install mesa-common-dev libxi-dev libxcursor-dev libgl-dev libxrandr-dev libasound2-dev
+          v install vsl
           
       # Runs a single command using the runners shell
       - name: tests

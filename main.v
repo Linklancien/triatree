@@ -14,9 +14,14 @@ mut:
 	carte Hexa_world
 
 	//
+	draw_nb     int = 1
+	rota_cache  [6]f32
+	coord_cache map[u64]Vec2[f32]
 	view_pos    Vec2[f32]
-	zomm_factor f32 = 1
+	zomm_factor f32 = 4
 }
+
+const dim_base = 8
 
 fn main() {
 	mut app := &App{}
@@ -37,13 +42,10 @@ fn main() {
 
 	app.carte = Hexa_world{
 		world: [6]Triatree_Ensemble{init: Triatree_Ensemble{
-			liste_tree: init_ensemble_divide(8, 2, Elements.water)
+			liste_tree: init_ensemble_divide(dim_base, 7, Elements.water)
 		}}
 	}
-	for _ in 0 .. 3 {
-		app.carte.divide_rec()
-	}
-
+	/*
 	ids := [app.carte.world[0].liste_tree.len - 1, 56, 12, 42, app.carte.world[0].liste_tree.len - 10]
 	mut elem := Elements.wood
 	for current in 0 .. 6 {
@@ -63,6 +65,9 @@ fn main() {
 			}
 		}
 	}
+	*/
+
+	app.carte.gen_terrain(dim_base)
 
 	app.ctx.run()
 }
@@ -75,53 +80,59 @@ fn on_init(mut app App) {
 }
 
 fn on_frame(mut app App) {
-	// clear
+	// clear the background (using .passthru later)
 	app.ctx.begin()
 	app.ctx.end()
 	app.ctx.show_fps()
 
-	app.carte.gravity_update()
+	app.ctx.begin()
+	app.draw_nb = 1
 
-	app.carte.draw(app.view_pos, 0, app.zomm_factor, 0, app.ctx)
+	//	app.carte.gravity_update()
+	app.carte.draw(app.view_pos, 0, app.zomm_factor, 0, mut app)
+	app.ctx.show_fps()
+	app.ctx.end(how: .passthru)
 }
 
 fn on_event(e &gg.Event, mut app App) {
-	match e.key_code {
-		.up {
-			app.view_pos += vec2[f32](f32(0), f32(mouv))
-		}
-		.down {
-			app.view_pos += vec2[f32](f32(0), f32(-mouv))
-		}
-		.left {
-			app.view_pos += vec2[f32](f32(-mouv), f32(0))
-		}
-		.right {
-			app.view_pos += vec2[f32](f32(mouv), f32(0))
-		}
-		.page_up {
-			app.zomm_factor += zoom_const
-		}
-		.page_down {
-			if app.zomm_factor > 1 {
-				app.zomm_factor -= zoom_const
+	match e.typ {
+		.key_down {
+			match e.key_code {
+				.up {
+					app.view_pos += vec2[f32](f32(0), -f32(mouv))
+				}
+				.down {
+					app.view_pos += vec2[f32](f32(0), f32(mouv))
+				}
+				.left {
+					app.view_pos += vec2[f32](f32(mouv), f32(0))
+				}
+				.right {
+					app.view_pos += vec2[f32](f32(-mouv), f32(0))
+				}
+				.page_up {
+					app.zomm_factor += zoom_const
+				}
+				.page_down {
+					if app.zomm_factor > 1 {
+						app.zomm_factor -= zoom_const
+					}
+				}
+				.escape {
+					app.ctx.quit()
+				}
+				else {}
 			}
 		}
-		.escape {
-			app.ctx.quit()
+		.mouse_scroll {
+			if e.scroll_y > 0 {
+				app.zomm_factor += zoom_const
+			} else if e.scroll_y < 0 {
+				if app.zomm_factor > 1 {
+					app.zomm_factor -= zoom_const
+				}
+			}
 		}
-		// .mouse_scroll {
-		// 	e.scroll_y
-		// 	{
-		// 		if e.scroll_y > 0 {
-		// 			app.zomm_factor += zoom_const
-		// 		} else if e.scroll_y < 0 {
-		// 			if app.zomm_factor > 1 {
-		// 				app.zomm_factor -= zoom_const
-		// 			}
-		// 		}
-		// 	}
-		// }
 		else {}
 	}
 }

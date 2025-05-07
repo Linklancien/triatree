@@ -1,19 +1,24 @@
 module main
 
 import math
+import math.vec { Vec2 }
 
 fn test_coos() {
 	println('--------------------')
 	println('test_coos():')
+	mut app := Appli(App{})
+	for i in 0 .. 6 {
+		app.rota_cache[i] = math.pi / 3.0 * i
+	}
 
 	print('test 1 bijection:')
 	for x in 0 .. 4 {
 		for y in 0 .. 4 {
 			for z in 0 .. 4 {
 				coo := [x, y, z]
-				pos := coo_tria_to_cart(coo, 0, coo.len)
+				pos := app.coo_tria_to_cart(coo, 0, coo.len)
 				new_coo := coo_cart_to_tria(pos, coo.len)
-				new_pos := coo_tria_to_cart(new_coo, 0, coo.len)
+				new_pos := app.coo_tria_to_cart(new_coo, 0, coo.len)
 
 				assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
 				assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
@@ -22,6 +27,9 @@ fn test_coos() {
 		}
 	}
 	println('success')
+
+	// RESET
+	app.coord_cache = map[u64]Vec2[f32]{}
 	print('test 2 hugest bijection:')
 	for x in 0 .. 4 {
 		for y in 0 .. 4 {
@@ -30,9 +38,9 @@ fn test_coos() {
 					for s in 0 .. 4 {
 						for t in 0 .. 4 {
 							coo := [x, y, z, r, s, t]
-							pos := coo_tria_to_cart(coo, 0, coo.len)
+							pos := app.coo_tria_to_cart(coo, 0, coo.len)
 							new_coo := coo_cart_to_tria(pos, coo.len)
-							new_pos := coo_tria_to_cart(new_coo, 0, coo.len)
+							new_pos := app.coo_tria_to_cart(new_coo, 0, coo.len)
 
 							assert coo == new_coo, 'assertion failed: coo ${coo}, pos ${pos}, new_coo ${new_coo}, new_pos ${new_pos} '
 							assert pos == new_pos, 'assertion failed: \n coo ${coo} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
@@ -52,6 +60,10 @@ fn test_coos() {
 fn test_hexa_world_coos() {
 	println('--------------------')
 	println('test_hexa_world_neighbors():')
+	mut app := Appli(App{})
+	for i in 0 .. 6 {
+		app.rota_cache[i] = math.pi / 3.0 * i
+	}
 
 	print('test 1 bijection:')
 	for c in 0 .. 6 {
@@ -59,9 +71,9 @@ fn test_hexa_world_coos() {
 			for y in 0 .. 4 {
 				for z in 0 .. 4 {
 					coo := [x, y, z]
-					pos := hexa_world_coo_tria_to_cart(coo, c, coo.len)
+					pos := app.hexa_world_coo_tria_to_cart(coo, c, coo.len)
 					new_coo, new_c := hexa_world_coo_cart_to_tria(pos, coo.len)
-					new_pos := hexa_world_coo_tria_to_cart(new_coo, new_c, coo.len)
+					new_pos := app.hexa_world_coo_tria_to_cart(new_coo, new_c, coo.len)
 
 					assert coo == new_coo, 'assertion failed: \n coo ${coo}, c ${c} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo}, new_c ${new_c} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '
 					assert pos == new_pos, 'assertion failed: \n coo ${coo}, c ${c} \n pos.magnitude() ${pos.magnitude()} \n pos ${pos} \n new_coo ${new_coo}, new_c ${new_c} \n new_pos.magnitude() ${new_pos.magnitude()} \n new_pos ${new_pos} '

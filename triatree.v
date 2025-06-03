@@ -4,6 +4,8 @@ import math
 import math.vec { Vec2, vec2 }
 import gg
 import vsl.noise
+import stbi
+import os
 // v install vsl
 
 const triabase = [0, 1, 2, 3]
@@ -93,7 +95,7 @@ mut:
 // GEN PROC
 fn (mut hw Hexa_world) gen_terrain(dim int) {
 	gen := noise.Generator.new()
-	res := 10000
+	res := 10_000
 	radius := 150
 	x_c := 0
 	y_c := 0
@@ -103,17 +105,41 @@ fn (mut hw Hexa_world) gen_terrain(dim int) {
 	perlin_x_off := 0.0
 	perlin_y_off := 0.0
 	per_size := 22.0
-	for i in 0 .. res {
-		cos := math.cos(i * arc)
-		sin := math.sin(i * arc)
-		mut x := x_c + radius * cos
-		mut y := y_c + radius * sin
-		per := gen.simplex_2d(perlin_x_off + cos * perlin_scale, perlin_y_off + sin * perlin_scale)
-		x += per * per_size * cos
-		y += per * per_size * sin
-		idx, nb := hw.go_to_coords(f32(x), f32(y), dim)
-		hw.world[nb].liste_tree[idx].change_elements(.wood, mut hw.world[nb])
+	// for i in 0 .. res {
+	// 	cos := math.cos(i * arc)
+	// 	sin := math.sin(i * arc)
+	// 	mut x := x_c + radius * cos
+	// 	mut y := y_c + radius * sin
+	// 	per := gen.simplex_2d(perlin_x_off + cos * perlin_scale, perlin_y_off + sin * perlin_scale)
+	// 	// println('${i}: ${per}  || ${perlin_x_off + cos * perlin_scale}, ${perlin_y_off + sin * perlin_scale}')
+	// 	x += per * per_size * cos
+	// 	y += per * per_size * sin
+	// 	idx, nb := hw.go_to_coords(f32(x), f32(y), dim)
+	// 	hw.world[nb].liste_tree[idx].change_elements(.wood, mut hw.world[nb])
+	// }
+	basedir := os.real_path(os.join_path(os.dir(@FILE)))
+	path := os.join_path(basedir, 'image.bmp')
+	div := 10
+	prec := 10*div
+	comp := 4
+	mut image := []u8{}
+	
+	println(image)
+	for x in 0..prec{
+		for y in 0..prec{
+			per := gen.simplex_2d(x/f32(div), y/f32(div))
+			if per > 	0{
+				image << [u8(255)]
+				image << []u8{len: 2, init: u8(0)}
+			}
+			else{
+				image << []u8{len: 3, init: u8(127*per + 128)}
+			}
+			image << [u8(255)]
+		}
 	}
+	buf := image.data
+	stbi.stbi_write_bmp(path, prec, prec, comp, buf) or {panic('Error')}
 }
 
 // COO TRIA TO CART:
